@@ -24,7 +24,7 @@ export default function LoginPage() {
   const { setAuth } = useAuthStore();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
@@ -112,10 +112,8 @@ export default function LoginPage() {
                   key={acc.email}
                   type="button"
                   onClick={() => {
-                    const emailInput = document.getElementById('email') as HTMLInputElement;
-                    const passwordInput = document.getElementById('password') as HTMLInputElement;
-                    if (emailInput) emailInput.value = acc.email;
-                    if (passwordInput) passwordInput.value = acc.password;
+                    setValue('email', acc.email);
+                    setValue('password', acc.password);
                   }}
                   className="p-2 rounded-lg bg-muted hover:bg-accent text-left transition-colors"
                 >

@@ -93,7 +93,7 @@ export default function ContractsPage() {
                       <td className="px-6 py-4 hidden xl:table-cell">
                         {daysLeft !== null && (
                           <span className={`text-xs font-medium flex items-center gap-1 ${daysLeft <= 30 ? 'text-red-600' : daysLeft <= 60 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                            {daysLeft <= 0 ? 'Expired' : `${daysLeft}d left`}
+                            {daysLeft < 0 ? 'Expired' : daysLeft === 0 ? 'Expires today' : `${daysLeft}d left`}
                             {daysLeft > 0 && daysLeft <= 30 && <AlertTriangle className="w-3 h-3" />}
                           </span>
                         )}

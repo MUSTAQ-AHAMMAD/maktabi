@@ -19,6 +19,8 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
     } else if (!user) {
       setAuth(storedUser, token);
     }
+  // Run only on mount: reads localStorage and hydrates auth store once.
+  // Including router/setAuth/user in deps would cause re-runs on every render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
