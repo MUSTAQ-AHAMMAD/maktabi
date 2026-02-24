@@ -53,25 +53,37 @@ Then open:
 - Node.js 20+
 - PostgreSQL 15+
 
-#### Backend
+#### 1. Create the PostgreSQL database and user
+
+Connect to your PostgreSQL server as a superuser (e.g. `postgres`) and run:
+
+```sql
+CREATE USER maktabi WITH PASSWORD 'maktabi123';
+CREATE DATABASE maktabi_db OWNER maktabi;
+GRANT ALL PRIVILEGES ON DATABASE maktabi_db TO maktabi;
+```
+
+> **Note:** If you use different credentials, update `DATABASE_URL` in `backend/.env` accordingly.
+
+#### 2. Backend
 
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your DATABASE_URL and JWT_SECRET
+# Edit .env if you used different PostgreSQL credentials above
 npm install
 npx prisma generate
-npx prisma migrate dev
+npx prisma migrate deploy
 npx ts-node prisma/seed.ts
 npm run start:dev
 ```
 
-#### Frontend
+#### 3. Frontend
 
 ```bash
 cd frontend
 cp .env.example .env.local
-# Edit .env.local with your NEXT_PUBLIC_API_URL
+# Edit .env.local if the backend runs on a different host/port
 npm install
 npm run dev
 ```
