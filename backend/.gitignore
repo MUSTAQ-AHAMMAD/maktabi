@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment files - never commit secrets
+.env
+.env.local
+.env.*.local
+
+# Prisma
+prisma/migrations/
+
+# TypeScript incremental
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
