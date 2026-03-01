@@ -51,21 +51,47 @@ Then open:
 
 #### Prerequisites
 - Node.js 20+
-- PostgreSQL 15+
+- PostgreSQL 15+ (**not** MySQL/MariaDB — this project requires PostgreSQL)
+
+> **Windows / XAMPP users:** XAMPP ships with MySQL/MariaDB, **not** PostgreSQL.
+> You must install PostgreSQL separately.  Download the Windows installer from
+> <https://www.postgresql.org/download/windows/> and run it.  During
+> installation, note the password you set for the built-in `postgres` superuser
+> — you will need it in the next step.
 
 #### 1. Create the PostgreSQL database and user
 
-Connect to your PostgreSQL server as a superuser (e.g. `postgres`) and run:
+**Linux / macOS**
+
+```bash
+psql -U postgres
+```
+
+**Windows** (open "SQL Shell (psql)" from the Start menu, or run from Command Prompt / PowerShell):
+
+```cmd
+psql -U postgres -h localhost
+```
+
+Once connected, run:
 
 ```sql
 CREATE USER maktabi WITH PASSWORD 'maktabi123';
 CREATE DATABASE maktabi_db OWNER maktabi;
 GRANT ALL PRIVILEGES ON DATABASE maktabi_db TO maktabi;
+\q
 ```
 
-> **Note:** If you use different credentials, update `DATABASE_URL` in `backend/.env` accordingly.
+> **pgAdmin alternative:** If you prefer a GUI, open pgAdmin, connect to your
+> local server, open the *Query Tool*, and paste the three SQL statements above
+> (`\q` is a psql command to quit and is not needed in pgAdmin).
+
+> **Note:** If you choose a different username or password, update
+> `DATABASE_URL` in `backend/.env` accordingly.
 
 #### 2. Backend
+
+**Linux / macOS**
 
 ```bash
 cd backend
@@ -78,11 +104,59 @@ npx ts-node prisma/seed.ts
 npm run start:dev
 ```
 
+**Windows (Command Prompt)**
+
+```cmd
+cd backend
+copy .env.example .env
+rem Edit .env if you used different PostgreSQL credentials above
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
+npm run start:dev
+```
+
+**Windows (PowerShell)**
+
+```powershell
+cd backend
+Copy-Item .env.example .env
+# Edit .env if you used different PostgreSQL credentials above
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
+npm run start:dev
+```
+
 #### 3. Frontend
+
+**Linux / macOS**
 
 ```bash
 cd frontend
 cp .env.example .env.local
+# Edit .env.local if the backend runs on a different host/port
+npm install
+npm run dev
+```
+
+**Windows (Command Prompt)**
+
+```cmd
+cd frontend
+copy .env.example .env.local
+rem Edit .env.local if the backend runs on a different host/port
+npm install
+npm run dev
+```
+
+**Windows (PowerShell)**
+
+```powershell
+cd frontend
+Copy-Item .env.example .env.local
 # Edit .env.local if the backend runs on a different host/port
 npm install
 npm run dev
