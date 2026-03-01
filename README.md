@@ -38,6 +38,8 @@ maktabi/
 
 ### Option 1: Docker Compose (Recommended)
 
+> **No PostgreSQL installation required.** Docker bundles everything — database, backend, and frontend.
+
 ```bash
 docker-compose up -d
 ```
@@ -47,7 +49,90 @@ Then open:
 - Backend API: http://localhost:3001
 - Swagger Docs: http://localhost:3001/api/docs
 
-### Option 2: Manual Setup
+### Option 2: DB in Docker + local backend & frontend
+
+Use this option if you want to run the backend and frontend directly with Node.js (e.g. for hot-reload development) but **do not have PostgreSQL installed** on your machine.
+
+#### Prerequisites
+- Node.js 20+
+- Docker Desktop
+
+#### 1. Start only the PostgreSQL container
+
+```bash
+docker-compose -f docker-compose.db-only.yml up -d
+```
+
+This starts PostgreSQL on `localhost:5432` with the credentials already set in `backend/.env.example`. No further database configuration is needed.
+
+#### 2. Backend
+
+**Linux / macOS**
+
+```bash
+cd backend
+cp .env.example .env
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
+npm run start:dev
+```
+
+**Windows (Command Prompt)**
+
+```cmd
+cd backend
+copy .env.example .env
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
+npm run start:dev
+```
+
+**Windows (PowerShell)**
+
+```powershell
+cd backend
+Copy-Item .env.example .env
+npm install
+npx prisma generate
+npx prisma migrate deploy
+npx ts-node prisma/seed.ts
+npm run start:dev
+```
+
+#### 3. Frontend
+
+**Linux / macOS**
+
+```bash
+cd frontend
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+**Windows (Command Prompt)**
+
+```cmd
+cd frontend
+copy .env.example .env.local
+npm install
+npm run dev
+```
+
+**Windows (PowerShell)**
+
+```powershell
+cd frontend
+Copy-Item .env.example .env.local
+npm install
+npm run dev
+```
+
+### Option 3: Manual Setup (PostgreSQL installed locally)
 
 #### Prerequisites
 - Node.js 20+
