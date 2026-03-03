@@ -282,6 +282,60 @@ GET    /audit                         Audit logs (Admin/CEO)
 GET    /users                         User directory
 ```
 
+## 📸 Screenshots
+
+### Login Page
+![Login Page](docs/screenshots/01-login.png)
+
+The login screen features the Maktabi branding, email/password fields, and quick-access demo account buttons.
+
+### Dashboard
+![Dashboard](docs/screenshots/02-dashboard.png)
+
+The role-based dashboard shows KPI cards (Total Cases, Active Cases, Contracts, Pending Consultations), Financial Exposure summary, and Risk Distribution chart.
+
+### Litigation Cases
+![Litigation Cases](docs/screenshots/03-litigation.png)
+
+Browse, search, and filter all litigation cases. The top-right **+ New Case** button opens the case creation form.
+
+### New Litigation Case Form
+![New Litigation Case](docs/screenshots/04-litigation-new.png)
+
+Multi-field form to register a new litigation case with case number, type, court, assigned lawyer, risk level, and more.
+
+### Investigations
+![Investigations](docs/screenshots/05-investigations.png)
+
+HR disciplinary investigation tracker with severity classification and confidentiality controls.
+
+### Consultations
+![Consultations](docs/screenshots/06-consultations.png)
+
+Legal opinion request management with SLA tracking and knowledge tagging.
+
+### Contracts
+![Contracts](docs/screenshots/07-contracts.png)
+
+Full contract lifecycle management — view active contracts, expiry alerts, and multi-step approval status.
+
+### Financial Executions
+![Financial](docs/screenshots/08-financial.png)
+
+Track financial execution orders, record payments, and monitor payment progress.
+
+### User Directory
+![Users](docs/screenshots/09-users.png)
+
+Admin view of all platform users with their roles and contact details.
+
+### Audit Log
+![Audit Log](docs/screenshots/10-audit.png)
+
+Chronological audit trail of all system actions, accessible to Admin and CEO roles.
+
+---
+
 ## 🗄 Database Schema
 
 Key entities: `User`, `LitigationCase`, `Hearing`, `Investigation`, `Consultation`, `Contract`, `FinancialExecution`, `Payment`, `Document`, `WorkflowState`, `ApprovalLog`, `AuditLog`, `Notification`
