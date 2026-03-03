@@ -1,15 +1,29 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Bell, Search, Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/auth.store';
+import api from '@/lib/api';
 
 export function Topnav({ title }: { title?: string }) {
   const { theme, setTheme } = useTheme();
   const { user } = useAuthStore();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    api.get('/notifications')
+      .then(r => {
+        const notifications = r.data as Array<Record<string, unknown>>;
+        const unread = notifications.filter(n => !n.isRead).length;
+        setUnreadCount(unread);
+      })
+      .catch(() => {});
+  }, [user]);
 
   return (
     <header className="h-16 border-b border-border bg-background/95 backdrop-blur sticky top-0 z-30 flex items-center px-6 gap-4">
@@ -27,7 +41,11 @@ export function Topnav({ title }: { title?: string }) {
         </Button>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1 right-1 min-w-[1rem] h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </Button>
         {user && (
           <Avatar className="h-8 w-8">
