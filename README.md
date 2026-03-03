@@ -347,3 +347,33 @@ Key entities: `User`, `LitigationCase`, `Hearing`, `Investigation`, `Consultatio
 **Backend**: NestJS · TypeScript · Prisma ORM · PostgreSQL · JWT · Passport · Swagger
 
 **DevOps**: Docker · Docker Compose
+
+**Mobile**: Capacitor 8 · Android (Android Studio) · iOS (Xcode)
+
+---
+
+## 📱 Android & iOS Apps
+
+The web application can be packaged as a native Android or iOS app using [Capacitor](https://capacitorjs.com/).
+
+### Quick start
+
+```bash
+cd frontend
+
+# 1. Install dependencies (first time, requires Node.js 22+)
+npm install
+
+# 2. Build static export and sync to native projects
+NEXT_STATIC_EXPORT=true npm run build:static
+
+# 3a. Add Android platform and open in Android Studio
+npx cap add android
+npm run cap:android
+
+# 3b. Add iOS platform and open in Xcode (macOS only)
+npx cap add ios
+npm run cap:ios
+```
+
+See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-reload workflow, and publishing guidance.
