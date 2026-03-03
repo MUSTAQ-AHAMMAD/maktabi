@@ -1,0 +1,39 @@
+# Starts only the PostgreSQL database in Docker.
+# Use this when you want to run the backend and frontend locally (e.g. with
+# `npm run start:dev` / `npm run dev`) but do NOT have PostgreSQL installed on
+# your machine.
+#
+# Usage:
+#   docker-compose -f docker-compose.db-only.yml up -d
+#
+# The database will be reachable at localhost:5432 with the credentials that
+# match the defaults in backend/.env.example.
+#
+# ⚠️  FOR LOCAL DEVELOPMENT ONLY.
+# These credentials are intentionally simple defaults shared with .env.example
+# and docker-compose.yml so that no extra configuration is needed for a first
+# run.  NEVER use these values in a production or internet-facing deployment.
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: maktabi_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: maktabi_db
+      POSTGRES_USER: maktabi
+      POSTGRES_PASSWORD: maktabi123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U maktabi -d maktabi_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
