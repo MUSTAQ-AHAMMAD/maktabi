@@ -221,7 +221,7 @@ export default function LoginPage() {
 
               <Button type="submit" className="w-full h-11 text-sm font-semibold gap-2" disabled={isSubmitting}>
                 {isSubmitting
-                  ? <><Loader2 className="w-4 h-4 animate-spin" />Signing in…</>
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
                   : <><span>Sign in</span><ArrowRight className="w-4 h-4" /></>}
               </Button>
             </form>

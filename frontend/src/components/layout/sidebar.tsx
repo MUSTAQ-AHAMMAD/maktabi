@@ -26,7 +26,7 @@ const roleLabels: Record<string, string> = {
 const navItems = [
   { href: '/dashboard',      label: 'Dashboard',     icon: LayoutDashboard },
   { href: '/litigation',     label: 'Litigation',    icon: Scale },
-  { href: '/investigations', label: 'Investigations',icon: Search },
+  { href: '/investigations', label: 'Investigations', icon: Search },
   { href: '/consultations',  label: 'Consultations', icon: FileText },
   { href: '/contracts',      label: 'Contracts',     icon: Briefcase },
   { href: '/financial',      label: 'Financial',     icon: DollarSign },
