@@ -26,10 +26,10 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <AppLayout title="Dashboard">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <Skeleton className="h-64 rounded-xl" />
           <Skeleton className="h-64 rounded-xl" />
         </div>
@@ -57,14 +57,14 @@ export default function DashboardPage() {
   return (
     <AppLayout title="Dashboard">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <KpiCard title="Total Cases" value={kpis?.totalCases || 0} subtitle="All litigation cases" icon={Scale} iconColor="text-blue-600" />
-          <KpiCard title="Active Cases" value={kpis?.activeCases || 0} subtitle="In progress or hearing" icon={Clock} iconColor="text-amber-600" />
-          <KpiCard title="Contracts" value={kpis?.totalContracts || 0} subtitle={`${kpis?.expiringContracts || 0} expiring soon`} icon={Briefcase} iconColor="text-purple-600" />
-          <KpiCard title="Pending Consultations" value={kpis?.pendingConsultations || 0} subtitle="Awaiting legal opinion" icon={FileText} iconColor="text-teal-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <KpiCard title="Total Cases" value={kpis?.totalCases || 0} subtitle="All litigation cases" icon={Scale} iconColor="text-blue-600" iconBg="bg-blue-100 dark:bg-blue-900/30" />
+          <KpiCard title="Active Cases" value={kpis?.activeCases || 0} subtitle="In progress or hearing" icon={Clock} iconColor="text-amber-600" iconBg="bg-amber-100 dark:bg-amber-900/30" />
+          <KpiCard title="Contracts" value={kpis?.totalContracts || 0} subtitle={`${kpis?.expiringContracts || 0} expiring soon`} icon={Briefcase} iconColor="text-purple-600" iconBg="bg-purple-100 dark:bg-purple-900/30" />
+          <KpiCard title="Pending Consultations" value={kpis?.pendingConsultations || 0} subtitle="Awaiting legal opinion" icon={FileText} iconColor="text-teal-600" iconBg="bg-teal-100 dark:bg-teal-900/30" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
