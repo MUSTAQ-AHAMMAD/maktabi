@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
+import { Bell, CheckCheck, Info, AlertTriangle, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import api from '@/lib/api';
@@ -27,11 +28,38 @@ const typeConfig: Record<string, { icon: React.ElementType; color: string; bg: s
   ERROR: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30' },
 };
 
+function getEntityLink(entityType?: string, entityId?: string): string | null {
+  if (!entityType || !entityId) return null;
+  const routes: Record<string, string> = {
+    LITIGATION: '/litigation',
+    CONTRACT: '/contracts',
+    INVESTIGATION: '/investigations',
+    CONSULTATION: '/consultations',
+    FINANCIAL: '/financial',
+  };
+  const base = routes[entityType];
+  return base ? `${base}/${entityId}` : null;
+}
+
+function getEntityLabel(entityType?: string): string {
+  if (!entityType) return '';
+  const labels: Record<string, string> = {
+    LITIGATION: '⚖ Litigation Case',
+    CONTRACT: '📄 Contract',
+    INVESTIGATION: '🔍 Investigation',
+    CONSULTATION: '💬 Consultation',
+    FINANCIAL: '💰 Financial',
+    HEARING: '🔔 Hearing',
+  };
+  return labels[entityType] || entityType;
+}
+
 export default function NotificationsPage() {
   const [items, setItems] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     api.get('/notifications')
@@ -50,11 +78,17 @@ export default function NotificationsPage() {
     }
   };
 
-  const markOneRead = async (id: string) => {
-    try {
-      await api.put(`/notifications/${id}/read`);
-      setItems(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    } catch {}
+  const handleClick = async (n: Notification) => {
+    if (!n.isRead) {
+      try {
+        await api.put(`/notifications/${n.id}/read`);
+        setItems(prev => prev.map(item => item.id === n.id ? { ...item, isRead: true } : item));
+      } catch {}
+    }
+    const link = getEntityLink(n.entityType, n.entityId);
+    if (link) {
+      router.push(link);
+    }
   };
 
   const unreadCount = items.filter(n => !n.isRead).length;
@@ -109,10 +143,11 @@ export default function NotificationsPage() {
             {filtered.map(n => {
               const cfg = typeConfig[n.type] || typeConfig['INFO'];
               const Icon = cfg.icon;
+              const entityLink = getEntityLink(n.entityType, n.entityId);
               return (
                 <div
                   key={n.id}
-                  onClick={() => !n.isRead && markOneRead(n.id)}
+                  onClick={() => handleClick(n)}
                   className={`flex items-start gap-4 p-4 transition-colors cursor-pointer hover:bg-muted/50 ${!n.isRead ? 'bg-primary/5' : ''}`}
                 >
                   <div className={`p-2 rounded-lg shrink-0 ${cfg.bg}`}>
@@ -134,9 +169,17 @@ export default function NotificationsPage() {
                     </div>
                     <p className="text-sm text-muted-foreground mt-0.5">{n.message}</p>
                     {n.entityType && (
-                      <span className="text-xs text-muted-foreground mt-1 inline-block">
-                        {n.entityType}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-xs text-muted-foreground">
+                          {getEntityLabel(n.entityType)}
+                        </span>
+                        {entityLink && (
+                          <span className="text-xs text-primary flex items-center gap-0.5">
+                            <ExternalLink className="w-3 h-3" />
+                            View
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
