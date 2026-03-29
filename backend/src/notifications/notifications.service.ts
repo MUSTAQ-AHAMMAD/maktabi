@@ -68,11 +68,11 @@ export class NotificationsService {
         ],
       },
       select: { id: true },
+      distinct: ['id'],
     });
-    const uniqueIds = [...new Set(targets.map(t => t.id))];
-    for (const userId of uniqueIds) {
+    for (const target of targets) {
       await this.create({
-        userId,
+        userId: target.id,
         title: 'Hearing Scheduled',
         message: `A hearing for case ${caseNumber} is scheduled for ${new Date(hearingDate).toLocaleDateString()}.`,
         type: 'WARNING',

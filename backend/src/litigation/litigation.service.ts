@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class LitigationService {
+  private readonly logger = new Logger(LitigationService.name);
   constructor(private prisma: PrismaService, private notifications: NotificationsService) {}
 
   async findAll(query: any = {}) {
@@ -41,7 +42,7 @@ export class LitigationService {
     await this.prisma.workflowState.create({
       data: { entityType: 'LITIGATION', entityId: newCase.id, toStatus: 'DRAFT', action: 'CREATE', performedById: userId },
     });
-    this.notifications.notifyNewCase({ id: newCase.id, caseNumber: newCase.caseNumber }, userId).catch(() => {});
+    this.notifications.notifyNewCase({ id: newCase.id, caseNumber: newCase.caseNumber }, userId).catch(err => this.logger.warn(`Failed to send new case notification: ${err.message}`));
     return newCase;
   }
 
@@ -52,7 +53,7 @@ export class LitigationService {
     await this.prisma.workflowState.create({
       data: { entityType: 'LITIGATION', entityId: id, fromStatus: c.status, toStatus: status, action: 'STATUS_CHANGE', performedById: userId, notes },
     });
-    this.notifications.notifyStatusChange('LITIGATION', id, c.caseNumber, status, userId).catch(() => {});
+    this.notifications.notifyStatusChange('LITIGATION', id, c.caseNumber, status, userId).catch(err => this.logger.warn(`Failed to send status change notification: ${err.message}`));
     return updated;
   }
 
@@ -64,7 +65,7 @@ export class LitigationService {
     const caseData = await this.prisma.litigationCase.findFirst({ where: { id: caseId, deletedAt: null }, select: { caseNumber: true, assignedLawyerId: true } });
     if (!caseData) throw new NotFoundException('Case not found');
     const hearing = await this.prisma.hearing.create({ data: { ...data, caseId } });
-    this.notifications.notifyHearingScheduled(caseData.caseNumber, data.hearingDate, caseData.assignedLawyerId || undefined).catch(() => {});
+    this.notifications.notifyHearingScheduled(caseData.caseNumber, data.hearingDate, caseData.assignedLawyerId || undefined).catch(err => this.logger.warn(`Failed to send hearing notification: ${err.message}`));
     return hearing;
   }
 

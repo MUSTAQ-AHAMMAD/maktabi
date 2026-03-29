@@ -53,6 +53,7 @@ interface CalendarEvent {
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DAYS_BEFORE_EXPIRY_TO_SHOW = 7;
 
 export default function CalendarPage() {
   const [hearings, setHearings] = useState<Hearing[]>([]);
@@ -88,7 +89,7 @@ export default function CalendarPage() {
         const contracts = r.data as ContractEvent[];
         const expiring = contracts
           .filter(c => c.endDate && c.status !== 'EXPIRED' && c.status !== 'TERMINATED')
-          .filter(c => differenceInDays(new Date(c.endDate), new Date()) >= -7)
+          .filter(c => differenceInDays(new Date(c.endDate), new Date()) >= -DAYS_BEFORE_EXPIRY_TO_SHOW)
           .sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
         setExpiringContracts(expiring);
       }).catch(() => {}),
