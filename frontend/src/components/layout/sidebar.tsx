@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Scale, Search, FileText, Briefcase, DollarSign,
-  Users, ChevronLeft, ChevronRight, LogOut, Shield, Bell, Calendar, Settings
+  Users, ChevronLeft, ChevronRight, LogOut, Shield, Bell, Calendar, Settings, Tag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
@@ -32,6 +32,7 @@ const navItems = [
   { href: '/financial',      label: 'Financial',     icon: DollarSign },
   { href: '/calendar',       label: 'Calendar',      icon: Calendar },
   { href: '/notifications',  label: 'Notifications', icon: Bell,    badge: true },
+  { href: '/brands',         label: 'Brands',        icon: Tag,     roles: ['ADMIN'] },
   { href: '/users',          label: 'Users',         icon: Users,   roles: ['ADMIN', 'LEGAL_MANAGER'] },
   { href: '/audit',          label: 'Audit Log',     icon: Shield,  roles: ['ADMIN', 'LEGAL_MANAGER', 'CEO'] },
 ];

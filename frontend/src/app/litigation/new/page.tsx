@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,6 +16,13 @@ import { useToast } from '@/components/ui/use-toast';
 import api from '@/lib/api';
 import Link from 'next/link';
 
+interface Brand {
+  id: string;
+  name: string;
+  code: string;
+  color: string;
+}
+
 const schema = z.object({
   caseType: z.string().min(1, 'Required'),
   courtName: z.string().min(1, 'Required'),
@@ -22,6 +30,7 @@ const schema = z.object({
   description: z.string().min(10, 'Min 10 characters'),
   riskLevel: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   financialExposure: z.string().optional(),
+  brandId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -29,10 +38,15 @@ type FormData = z.infer<typeof schema>;
 export default function NewLitigationPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [brands, setBrands] = useState<Brand[]>([]);
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { riskLevel: 'MEDIUM' },
   });
+
+  useEffect(() => {
+    api.get('/brands').then(r => setBrands(r.data)).catch(() => {});
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -67,6 +81,24 @@ export default function NewLitigationPage() {
                 <Input placeholder="e.g. Riyadh Commercial Court" {...register('courtName')} />
                 {errors.courtName && <p className="text-xs text-destructive">{errors.courtName.message}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Select onValueChange={v => setValue('brandId', v === 'none' ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Brand</SelectItem>
+                  {brands.map(b => (
+                    <SelectItem key={b.id} value={b.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

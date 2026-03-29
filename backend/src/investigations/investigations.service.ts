@@ -8,9 +8,10 @@ export class InvestigationsService {
   async findAll(query: any = {}) {
     const where: any = { deletedAt: null };
     if (query.status) where.status = query.status;
+    if (query.brandId) where.brandId = query.brandId;
     return this.prisma.investigation.findMany({
       where,
-      include: { createdBy: { select: { id: true, firstName: true, lastName: true } } },
+      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, brand: { select: { id: true, name: true, code: true, color: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -18,7 +19,7 @@ export class InvestigationsService {
   async findOne(id: string) {
     const inv = await this.prisma.investigation.findFirst({
       where: { id, deletedAt: null },
-      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, documents: true },
+      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, documents: true, brand: { select: { id: true, name: true, code: true, color: true } } },
     });
     if (!inv) throw new NotFoundException('Investigation not found');
     return inv;

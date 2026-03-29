@@ -11,9 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
+
+interface Brand { id: string; name: string; code: string; color: string; }
 
 interface InvestigationForm {
   title: string;
@@ -26,12 +28,16 @@ export default function NewInvestigationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfidential, setIsConfidential] = useState(false);
   const [severity, setSeverity] = useState('MEDIUM');
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandId, setBrandId] = useState<string | undefined>(undefined);
   const { register, handleSubmit } = useForm<InvestigationForm>();
+
+  useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   const onSubmit = async (data: InvestigationForm) => {
     setIsSubmitting(true);
     try {
-      await api.post('/investigations', { ...data, isConfidential, severity });
+      await api.post('/investigations', { ...data, isConfidential, severity, brandId });
       toast({ title: 'Investigation submitted' });
       router.push('/investigations');
     } catch {
@@ -69,6 +75,23 @@ export default function NewInvestigationPage() {
             <div className="flex items-center gap-3">
               <Switch checked={isConfidential} onCheckedChange={setIsConfidential} />
               <Label>Mark as Confidential</Label>
+            </div>
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Select onValueChange={v => setBrandId(v === 'none' ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Brand</SelectItem>
+                  {brands.map(b => (
+                    <SelectItem key={b.id} value={b.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={isSubmitting}>

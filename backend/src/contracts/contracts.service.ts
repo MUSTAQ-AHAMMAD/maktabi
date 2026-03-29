@@ -8,9 +8,10 @@ export class ContractsService {
   async findAll(query: any = {}) {
     const where: any = { deletedAt: null };
     if (query.status) where.status = query.status;
+    if (query.brandId) where.brandId = query.brandId;
     return this.prisma.contract.findMany({
       where,
-      include: { createdBy: { select: { id: true, firstName: true, lastName: true } } },
+      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, brand: { select: { id: true, name: true, code: true, color: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -18,7 +19,7 @@ export class ContractsService {
   async findOne(id: string) {
     const c = await this.prisma.contract.findFirst({
       where: { id, deletedAt: null },
-      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, documents: true },
+      include: { createdBy: { select: { id: true, firstName: true, lastName: true } }, documents: true, brand: { select: { id: true, name: true, code: true, color: true } } },
     });
     if (!c) throw new NotFoundException('Contract not found');
     return c;

@@ -9,11 +9,12 @@ export class FinancialService {
     const where: any = { deletedAt: null };
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;
-    return this.prisma.financialExecution.findMany({ where, include: { payments: true }, orderBy: { createdAt: 'desc' } });
+    if (query.brandId) where.brandId = query.brandId;
+    return this.prisma.financialExecution.findMany({ where, include: { payments: true, brand: { select: { id: true, name: true, code: true, color: true } } }, orderBy: { createdAt: 'desc' } });
   }
 
   async findOne(id: string) {
-    const f = await this.prisma.financialExecution.findFirst({ where: { id, deletedAt: null }, include: { payments: true, documents: true } });
+    const f = await this.prisma.financialExecution.findFirst({ where: { id, deletedAt: null }, include: { payments: true, documents: true, brand: { select: { id: true, name: true, code: true, color: true } } } });
     if (!f) throw new NotFoundException('Financial execution not found');
     return f;
   }

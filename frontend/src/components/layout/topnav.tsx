@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Bell, Search, Moon, Sun, X, CheckCheck } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuthStore } from '@/store/auth.store';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { format } from 'date-fns';
 
@@ -17,22 +18,50 @@ interface Notification {
   message: string;
   type: string;
   isRead: boolean;
+  entityType?: string;
+  entityId?: string;
   createdAt: string;
+}
+
+function getEntityLink(entityType?: string, entityId?: string): string | null {
+  if (!entityType || !entityId) return null;
+  const routes: Record<string, string> = {
+    LITIGATION: '/litigation',
+    CONTRACT: '/contracts',
+    INVESTIGATION: '/investigations',
+    CONSULTATION: '/consultations',
+    FINANCIAL: '/financial',
+  };
+  const base = routes[entityType];
+  return base ? `${base}/${entityId}` : null;
 }
 
 export function Topnav({ title }: { title?: string }) {
   const { theme, setTheme } = useTheme();
   const { user } = useAuthStore();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const fetchNotifications = useCallback(() => {
     if (!user) return;
     api.get('/notifications')
       .then(r => setNotifications(r.data))
       .catch(() => {});
   }, [user]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Poll every 30 seconds for new notifications
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user, fetchNotifications]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -53,11 +82,18 @@ export function Topnav({ title }: { title?: string }) {
     } catch {}
   };
 
-  const markOneRead = async (id: string) => {
-    try {
-      await api.put(`/notifications/${id}/read`);
-      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    } catch {}
+  const handleNotificationClick = async (n: Notification) => {
+    if (!n.isRead) {
+      try {
+        await api.put(`/notifications/${n.id}/read`);
+        setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, isRead: true } : item));
+      } catch {}
+    }
+    const link = getEntityLink(n.entityType, n.entityId);
+    if (link) {
+      setShowNotifications(false);
+      router.push(link);
+    }
   };
 
   return (
@@ -115,7 +151,7 @@ export function Topnav({ title }: { title?: string }) {
                   notifications.slice(0, 10).map(n => (
                     <div
                       key={n.id}
-                      onClick={() => markOneRead(n.id)}
+                      onClick={() => handleNotificationClick(n)}
                       className={`px-4 py-3 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors ${!n.isRead ? 'bg-primary/5' : ''}`}
                     >
                       <div className="flex items-start gap-3">
@@ -123,7 +159,14 @@ export function Topnav({ title }: { title?: string }) {
                         <div className="min-w-0 flex-1">
                           <p className={`text-sm font-medium ${!n.isRead ? 'text-foreground' : 'text-muted-foreground'}`}>{n.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{format(new Date(n.createdAt), 'MMM d, HH:mm')}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-muted-foreground">{format(new Date(n.createdAt), 'MMM d, HH:mm')}</p>
+                            {n.entityType && (
+                              <span className="text-[10px] text-primary font-medium">
+                                {n.entityType === 'LITIGATION' ? '⚖ Case' : n.entityType === 'CONTRACT' ? '📄 Contract' : n.entityType === 'HEARING' ? '🔔 Hearing' : n.entityType}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
