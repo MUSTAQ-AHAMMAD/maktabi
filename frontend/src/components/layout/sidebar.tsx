@@ -49,12 +49,16 @@ export function Sidebar() {
       animate={{ width: collapsed ? 64 : 260 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
       className="fixed left-0 top-0 h-full z-40 flex flex-col overflow-hidden"
-      style={{ background: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)' }}
+      style={{
+        background: 'var(--sidebar-bg)',
+        borderRight: '1px solid var(--sidebar-border)',
+        boxShadow: '4px 0 24px hsl(222 47% 7% / 0.15)',
+      }}
     >
       {/* Logo */}
       <div className="flex items-center h-16 px-4 shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 shadow-sm">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 shadow-md" style={{ boxShadow: '0 2px 12px hsl(221 83% 40% / 0.4)' }}>
             <Scale className="w-4 h-4 text-primary-foreground" />
           </div>
           <AnimatePresence>
@@ -93,6 +97,7 @@ export function Sidebar() {
                     ? 'linear-gradient(90deg, var(--sidebar-active-bg) 0%, hsl(221 83% 48%) 100%)'
                     : 'transparent',
                   color: isActive ? 'var(--sidebar-active-fg)' : 'var(--sidebar-fg)',
+                  boxShadow: isActive ? '0 2px 12px hsl(221 83% 40% / 0.3)' : 'none',
                 }}
                 onMouseEnter={e => {
                   if (!isActive) (e.currentTarget as HTMLElement).style.background = 'var(--sidebar-hover-bg)';
