@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/app-layout';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -85,9 +86,15 @@ export default function DashboardPage() {
     <AppLayout title="Dashboard">
       <div className="space-y-6">
         {/* ── Welcome banner ─────────────────────────────────────────────── */}
-        <div className="rounded-2xl p-6 text-white relative overflow-hidden" style={{
-          background: 'linear-gradient(135deg, hsl(221 83% 36%) 0%, hsl(239 84% 42%) 60%, hsl(262 83% 40%) 100%)',
-        }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+          className="rounded-2xl p-6 text-white relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, hsl(221 83% 36%) 0%, hsl(239 84% 42%) 60%, hsl(262 83% 40%) 100%)',
+          }}
+        >
           <div className="absolute inset-0 opacity-[0.06]" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M0 0h40v1H0zM0 0v40h1V0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
@@ -100,23 +107,33 @@ export default function DashboardPage() {
             </h1>
             <p className="text-white/70 text-sm mt-1">Here&apos;s your legal operations overview for today.</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Quick Actions ───────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.4, 0, 0.2, 1] }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+        >
           {quickActions.map(({ label, href, icon: Icon, color }) => (
             <Link key={href} href={href}>
-              <button className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all hover:shadow-md hover:-translate-y-0.5 ${color}`}>
+              <button className={`w-full flex items-center gap-2.5 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] ${color}`}>
                 <Icon className="w-4 h-4 shrink-0" />
                 <span>{label}</span>
                 <Plus className="w-3.5 h-3.5 ml-auto opacity-70" />
               </button>
             </Link>
           ))}
-        </div>
+        </motion.div>
 
         {/* ── KPI cards ──────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+        >
           <KpiCard
             title="Total Cases" value={kpis?.totalCases || 0}
             subtitle="All litigation cases"
@@ -137,11 +154,16 @@ export default function DashboardPage() {
             subtitle="Awaiting legal opinion"
             icon={FileText} iconColor="text-teal-600" iconBg="bg-teal-100 dark:bg-teal-900/30"
           />
-        </div>
+        </motion.div>
 
         {/* ── Financial + Risk ────────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="bg-card border border-border rounded-xl p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-5"
+        >
+          <div className="bg-card border border-border rounded-xl p-6 card-hover-glow">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
                 <DollarSign className="w-5 h-5 text-green-600" />
@@ -174,7 +196,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-6 card-hover-glow">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -206,11 +228,16 @@ export default function DashboardPage() {
               <div className="flex items-center justify-center h-28 text-muted-foreground text-sm">No data yet</div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* ── Timeline chart ──────────────────────────────────────────────── */}
         {(timeline as Array<Record<string, unknown>>).length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.4, ease: [0.4, 0, 0.2, 1] }}
+            className="bg-card border border-border rounded-xl p-6 card-hover-glow"
+          >
             <h3 className="font-semibold text-foreground mb-4">Cases Over Time</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={timeline as Array<Record<string, unknown>>}>
@@ -221,11 +248,16 @@ export default function DashboardPage() {
                 <Bar dataKey="count" fill="hsl(221,83%,40%)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </motion.div>
         )}
 
         {/* ── Today's Hearings ────────────────────────────────────────────── */}
-        <div className="bg-card border border-border rounded-xl p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.45, ease: [0.4, 0, 0.2, 1] }}
+          className="bg-card border border-border rounded-xl p-6 card-hover-glow"
+        >
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
@@ -246,7 +278,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {hearings.map(c => (
                 <Link key={c.id as string} href={`/litigation/${c.id as string}`}>
-                  <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-colors group cursor-pointer">
+                  <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/60 transition-all duration-200 group cursor-pointer hover:shadow-sm">
                     <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                       <Scale className="w-4 h-4 text-blue-600" />
                     </div>
@@ -260,11 +292,16 @@ export default function DashboardPage() {
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* ── Recent Cases ────────────────────────────────────────────────── */}
         {recentCases && recentCases.length > 0 && (
-          <div className="bg-card border border-border rounded-xl p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5, ease: [0.4, 0, 0.2, 1] }}
+            className="bg-card border border-border rounded-xl p-6 card-hover-glow"
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-foreground">Recent Cases</h3>
               <Link href="/litigation">
@@ -274,7 +311,7 @@ export default function DashboardPage() {
             <div className="space-y-2">
               {recentCases.map((c) => (
                 <Link key={c.id as string} href={`/litigation/${c.id as string}`}>
-                  <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/60 transition-colors cursor-pointer">
+                  <div className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/60 transition-all duration-200 cursor-pointer hover:shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                         <Scale className="w-4 h-4 text-blue-600" />
@@ -292,7 +329,7 @@ export default function DashboardPage() {
                 </Link>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </AppLayout>

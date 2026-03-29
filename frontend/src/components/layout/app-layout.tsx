@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Sidebar } from './sidebar';
 import { Topnav } from './topnav';
 import { useAuthStore } from '@/store/auth.store';
@@ -58,6 +59,7 @@ function Breadcrumb() {
 
 export function AppLayout({ children, title }: { children: React.ReactNode; title?: string }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, setAuth } = useAuthStore();
   const { collapsed } = useSidebarStore();
 
@@ -78,11 +80,18 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
   return (
     <div className="flex min-h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col transition-all duration-200" style={{ marginLeft: collapsed ? '64px' : '260px' }}>
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ marginLeft: collapsed ? '64px' : '260px' }}>
         <Topnav title={title} />
         <main className="flex-1 p-6 overflow-auto">
           <Breadcrumb />
-          {children}
+          <motion.div
+            key={pathname}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+          >
+            {children}
+          </motion.div>
         </main>
       </div>
     </div>

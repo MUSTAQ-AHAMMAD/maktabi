@@ -22,11 +22,13 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        'bg-card border border-border rounded-xl p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 group',
+        'bg-card border border-border rounded-xl p-5 card-hover-glow hover:-translate-y-0.5 transition-all duration-200 group relative overflow-hidden',
         className,
       )}
     >
-      <div className="flex items-start justify-between">
+      {/* Subtle gradient accent on hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-br from-primary/[0.02] to-transparent" />
+      <div className="relative flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide truncate">{title}</p>
           <p className="text-3xl font-bold text-foreground mt-2 tabular-nums">{value}</p>
@@ -45,7 +47,7 @@ export function KpiCard({
         </div>
         <div
           className={cn(
-            'p-3 rounded-xl shrink-0 ml-4 group-hover:scale-110 transition-transform duration-200',
+            'p-3 rounded-xl shrink-0 ml-4 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300',
             gradient
               ? `bg-gradient-to-br ${gradient}`
               : (iconBg || 'bg-muted'),

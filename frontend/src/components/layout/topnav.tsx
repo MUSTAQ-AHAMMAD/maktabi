@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { Bell, Search, Moon, Sun, X, CheckCheck } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -97,7 +98,7 @@ export function Topnav({ title }: { title?: string }) {
   };
 
   return (
-    <header className="h-16 border-b border-border bg-background/95 backdrop-blur sticky top-0 z-30 flex items-center px-6 gap-4">
+    <header className="h-16 border-b border-border bg-background/80 backdrop-blur-xl backdrop-saturate-150 sticky top-0 z-30 flex items-center px-6 gap-4 transition-colors duration-300">
       {title && <h1 className="text-lg font-semibold text-foreground hidden md:block">{title}</h1>}
       <div className="flex-1 max-w-md ml-auto md:ml-0">
         <div className="relative">
@@ -120,14 +121,21 @@ export function Topnav({ title }: { title?: string }) {
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 min-w-[1rem] h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center px-0.5">
+              <span className="absolute top-1 right-1 min-w-[1rem] h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center px-0.5 animate-subtle-pulse">
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </Button>
 
+          <AnimatePresence>
           {showNotifications && (
-            <div className="absolute right-0 top-12 w-96 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.96 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute right-0 top-12 w-96 bg-card/95 backdrop-blur-xl border border-border rounded-xl shadow-xl z-50 overflow-hidden"
+            >
               <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                 <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
                 <div className="flex items-center gap-2">
@@ -178,13 +186,14 @@ export function Topnav({ title }: { title?: string }) {
                   <button className="text-xs text-primary hover:underline w-full text-center">View all notifications</button>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
         </div>
 
         {user && (
           <Link href="/profile">
-            <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all">
+            <Avatar className="h-8 w-8 cursor-pointer ring-2 ring-transparent hover:ring-primary/40 transition-all duration-200">
               <AvatarFallback className="text-xs bg-primary text-primary-foreground font-semibold">
                 {user.firstName[0]}{user.lastName[0]}
               </AvatarFallback>
