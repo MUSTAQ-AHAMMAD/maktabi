@@ -61,11 +61,10 @@ export class LitigationService {
   }
 
   async addHearing(caseId: string, data: any) {
-    const caseData = await this.prisma.litigationCase.findFirst({ where: { id: caseId }, select: { caseNumber: true, assignedLawyerId: true } });
+    const caseData = await this.prisma.litigationCase.findFirst({ where: { id: caseId, deletedAt: null }, select: { caseNumber: true, assignedLawyerId: true } });
+    if (!caseData) throw new NotFoundException('Case not found');
     const hearing = await this.prisma.hearing.create({ data: { ...data, caseId } });
-    if (caseData) {
-      this.notifications.notifyHearingScheduled(caseData.caseNumber, data.hearingDate, caseData.assignedLawyerId || undefined).catch(() => {});
-    }
+    this.notifications.notifyHearingScheduled(caseData.caseNumber, data.hearingDate, caseData.assignedLawyerId || undefined).catch(() => {});
     return hearing;
   }
 

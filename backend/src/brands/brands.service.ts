@@ -27,6 +27,18 @@ export class BrandsService {
   async update(id: string, data: { name?: string; code?: string; description?: string; color?: string; isActive?: boolean }) {
     const brand = await this.prisma.brand.findUnique({ where: { id } });
     if (!brand) throw new NotFoundException('Brand not found');
+    if (data.name || data.code) {
+      const conflict = await this.prisma.brand.findFirst({
+        where: {
+          id: { not: id },
+          OR: [
+            ...(data.name ? [{ name: data.name }] : []),
+            ...(data.code ? [{ code: data.code }] : []),
+          ],
+        },
+      });
+      if (conflict) throw new ConflictException('Brand with this name or code already exists');
+    }
     return this.prisma.brand.update({ where: { id }, data });
   }
 
