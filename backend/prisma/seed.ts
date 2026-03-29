@@ -48,6 +48,31 @@ async function main() {
     create: { email: 'employee@maktabi.com', password: await hash('Employee@123'), firstName: 'Maryam', lastName: 'Al-Hassan', role: 'EMPLOYEE', department: 'Operations' },
   });
 
+  // Create brands
+  const ibraq = await prisma.brand.upsert({
+    where: { code: 'IBRAQ' },
+    update: {},
+    create: { name: 'IBRAQ', code: 'IBRAQ', description: 'IBRAQ Brand', color: '#3B82F6' },
+  });
+
+  const match = await prisma.brand.upsert({
+    where: { code: 'MATCH' },
+    update: {},
+    create: { name: 'MATCH', code: 'MATCH', description: 'MATCH Brand', color: '#8B5CF6' },
+  });
+
+  const feelin = await prisma.brand.upsert({
+    where: { code: 'FEELIN' },
+    update: {},
+    create: { name: 'FEELIN', code: 'FEELIN', description: 'FEELIN Brand', color: '#10B981' },
+  });
+
+  const salfa = await prisma.brand.upsert({
+    where: { code: 'SALFA' },
+    update: {},
+    create: { name: 'SALFA', code: 'SALFA', description: 'SALFA Brand', color: '#F59E0B' },
+  });
+
   const case1 = await prisma.litigationCase.upsert({
     where: { caseNumber: 'LIT-2024-001' },
     update: {},
@@ -63,6 +88,7 @@ async function main() {
       assignedLawyerId: lawyer.id,
       createdById: admin.id,
       slaDeadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      brandId: ibraq.id,
     },
   });
 
@@ -80,6 +106,7 @@ async function main() {
       status: 'HEARING',
       assignedLawyerId: lawyer.id,
       createdById: admin.id,
+      brandId: match.id,
     },
   });
 
@@ -96,6 +123,7 @@ async function main() {
       startDate: new Date('2024-01-01'),
       endDate: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000),
       createdById: admin.id,
+      brandId: feelin.id,
     },
   });
 
@@ -108,6 +136,7 @@ async function main() {
       paidAmount: 50000,
       currency: 'SAR',
       caseId: case1.id,
+      brandId: salfa.id,
     },
   });
 

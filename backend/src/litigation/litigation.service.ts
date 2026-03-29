@@ -1,18 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class LitigationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private notifications: NotificationsService) {}
 
   async findAll(query: any = {}) {
     const where: any = { deletedAt: null };
     if (query.status) where.status = query.status;
     if (query.riskLevel) where.riskLevel = query.riskLevel;
     if (query.assignedLawyerId) where.assignedLawyerId = query.assignedLawyerId;
+    if (query.brandId) where.brandId = query.brandId;
     return this.prisma.litigationCase.findMany({
       where,
-      include: { assignedLawyer: { select: { id: true, firstName: true, lastName: true } }, hearings: true },
+      include: { assignedLawyer: { select: { id: true, firstName: true, lastName: true } }, hearings: true, brand: { select: { id: true, name: true, code: true, color: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -24,6 +26,7 @@ export class LitigationService {
         assignedLawyer: { select: { id: true, firstName: true, lastName: true } },
         hearings: { orderBy: { hearingDate: 'asc' } },
         documents: true,
+        brand: { select: { id: true, name: true, code: true, color: true } },
       },
     });
     if (!c) throw new NotFoundException('Case not found');
@@ -38,6 +41,7 @@ export class LitigationService {
     await this.prisma.workflowState.create({
       data: { entityType: 'LITIGATION', entityId: newCase.id, toStatus: 'DRAFT', action: 'CREATE', performedById: userId },
     });
+    this.notifications.notifyNewCase({ id: newCase.id, caseNumber: newCase.caseNumber }, userId).catch(() => {});
     return newCase;
   }
 
@@ -48,6 +52,7 @@ export class LitigationService {
     await this.prisma.workflowState.create({
       data: { entityType: 'LITIGATION', entityId: id, fromStatus: c.status, toStatus: status, action: 'STATUS_CHANGE', performedById: userId, notes },
     });
+    this.notifications.notifyStatusChange('LITIGATION', id, c.caseNumber, status, userId).catch(() => {});
     return updated;
   }
 
@@ -56,7 +61,12 @@ export class LitigationService {
   }
 
   async addHearing(caseId: string, data: any) {
-    return this.prisma.hearing.create({ data: { ...data, caseId } });
+    const caseData = await this.prisma.litigationCase.findFirst({ where: { id: caseId }, select: { caseNumber: true, assignedLawyerId: true } });
+    const hearing = await this.prisma.hearing.create({ data: { ...data, caseId } });
+    if (caseData) {
+      this.notifications.notifyHearingScheduled(caseData.caseNumber, data.hearingDate, caseData.assignedLawyerId || undefined).catch(() => {});
+    }
+    return hearing;
   }
 
   async softDelete(id: string) {

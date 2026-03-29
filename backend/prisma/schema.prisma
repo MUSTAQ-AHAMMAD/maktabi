@@ -80,6 +80,25 @@ enum FinancialExecutionStatus {
   CANCELLED
 }
 
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  code        String   @unique
+  description String?
+  color       String   @default("#3B82F6")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  litigationCases   LitigationCase[]
+  investigations    Investigation[]
+  consultations     Consultation[]
+  contracts         Contract[]
+  financialExecutions FinancialExecution[]
+
+  @@index([isActive])
+}
+
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
@@ -121,18 +140,21 @@ model LitigationCase {
   createdById       String
   slaDeadline       DateTime?
   closedAt          DateTime?
+  brandId           String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   deletedAt         DateTime?
 
   assignedLawyer    User?       @relation("AssignedLawyer", fields: [assignedLawyerId], references: [id])
   createdBy         User        @relation("CaseCreator", fields: [createdById], references: [id])
+  brand             Brand?      @relation(fields: [brandId], references: [id])
   hearings          Hearing[]
   documents         Document[]
 
   @@index([status])
   @@index([riskLevel])
   @@index([assignedLawyerId])
+  @@index([brandId])
 }
 
 model Hearing {
@@ -165,14 +187,17 @@ model Investigation {
   appealNotes      String?             @db.Text
   slaDeadline      DateTime?
   closedAt         DateTime?
+  brandId          String?
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
   deletedAt        DateTime?
 
   createdBy        User                @relation("InvestigationCreator", fields: [createdById], references: [id])
+  brand            Brand?      @relation(fields: [brandId], references: [id])
   documents        Document[]
 
   @@index([status])
+  @@index([brandId])
 }
 
 model Consultation {
@@ -187,14 +212,17 @@ model Consultation {
   slaDeadline  DateTime?
   closedAt     DateTime?
   feedback     String?
+  brandId      String?
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
   deletedAt    DateTime?
 
   createdBy    User               @relation("ConsultationCreator", fields: [createdById], references: [id])
+  brand        Brand?      @relation(fields: [brandId], references: [id])
   documents    Document[]
 
   @@index([status])
+  @@index([brandId])
 }
 
 model Contract {
@@ -213,15 +241,18 @@ model Contract {
   riskScore       Int?
   clauseNotes     String?        @db.Text
   signatureReady  Boolean        @default(false)
+  brandId         String?
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   deletedAt       DateTime?
 
   createdBy       User           @relation("ContractCreator", fields: [createdById], references: [id])
+  brand           Brand?      @relation(fields: [brandId], references: [id])
   documents       Document[]
 
   @@index([status])
   @@index([endDate])
+  @@index([brandId])
 }
 
 model FinancialExecution {
@@ -235,15 +266,18 @@ model FinancialExecution {
   dueDate        DateTime?
   caseId         String?
   notes          String?                  @db.Text
+  brandId        String?
   createdAt      DateTime                 @default(now())
   updatedAt      DateTime                 @updatedAt
   deletedAt      DateTime?
 
   payments       Payment[]
   documents      Document[]
+  brand          Brand?      @relation(fields: [brandId], references: [id])
 
   @@index([status])
   @@index([type])
+  @@index([brandId])
 }
 
 model Payment {
