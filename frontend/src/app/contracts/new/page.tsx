@@ -4,15 +4,19 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useEffect, useState } from 'react';
 import { AppLayout } from '@/components/layout/app-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import api from '@/lib/api';
 import Link from 'next/link';
+
+interface Brand { id: string; name: string; code: string; color: string; }
 
 const schema = z.object({
   title: z.string().min(1, 'Required'),
@@ -21,6 +25,7 @@ const schema = z.object({
   value: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
+  brandId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -28,9 +33,12 @@ type FormData = z.infer<typeof schema>;
 export default function NewContractPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -79,6 +87,23 @@ export default function NewContractPage() {
                 <Label>End Date</Label>
                 <Input type="date" {...register('endDate')} />
               </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Select onValueChange={v => setValue('brandId', v === 'none' ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Brand</SelectItem>
+                  {brands.map(b => (
+                    <SelectItem key={b.id} value={b.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={isSubmitting}>

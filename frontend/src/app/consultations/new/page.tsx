@@ -7,11 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
+
+interface Brand { id: string; name: string; code: string; color: string; }
 
 interface ConsultationForm {
   title: string;
@@ -23,12 +26,16 @@ export default function NewConsultationPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandId, setBrandId] = useState<string | undefined>(undefined);
   const { register, handleSubmit } = useForm<ConsultationForm>();
+
+  useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   const onSubmit = async (data: ConsultationForm) => {
     setIsSubmitting(true);
     try {
-      await api.post('/consultations', data);
+      await api.post('/consultations', { ...data, brandId });
       toast({ title: 'Consultation submitted' });
       router.push('/consultations');
     } catch {
@@ -54,6 +61,23 @@ export default function NewConsultationPage() {
             <div className="space-y-2">
               <Label>SLA Deadline</Label>
               <Input type="datetime-local" {...register('slaDeadline')} />
+            </div>
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Select onValueChange={v => setBrandId(v === 'none' ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Brand</SelectItem>
+                  {brands.map(b => (
+                    <SelectItem key={b.id} value={b.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={isSubmitting}>

@@ -10,9 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import Link from 'next/link';
+
+interface Brand { id: string; name: string; code: string; color: string; }
 
 interface FinancialForm {
   title: string;
@@ -26,12 +28,16 @@ export default function NewFinancialPage() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [type, setType] = useState('AGAINST_COMPANY');
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandId, setBrandId] = useState<string | undefined>(undefined);
   const { register, handleSubmit } = useForm<FinancialForm>();
+
+  useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   const onSubmit = async (data: FinancialForm) => {
     setIsSubmitting(true);
     try {
-      await api.post('/financial', { ...data, type });
+      await api.post('/financial', { ...data, type, brandId });
       toast({ title: 'Financial execution created' });
       router.push('/financial');
     } catch {
@@ -73,6 +79,23 @@ export default function NewFinancialPage() {
             <div className="space-y-2">
               <Label>Notes</Label>
               <Textarea placeholder="Additional notes..." rows={3} {...register('notes')} />
+            </div>
+            <div className="space-y-2">
+              <Label>Brand</Label>
+              <Select onValueChange={v => setBrandId(v === 'none' ? undefined : v)}>
+                <SelectTrigger><SelectValue placeholder="Select brand (optional)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Brand</SelectItem>
+                  {brands.map(b => (
+                    <SelectItem key={b.id} value={b.id}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-3 pt-2">
               <Button type="submit" disabled={isSubmitting}>

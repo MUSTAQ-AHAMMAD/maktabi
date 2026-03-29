@@ -21,6 +21,7 @@ const routeLabels: Record<string, string> = {
   notifications: 'Notifications',
   users:         'Users',
   audit:         'Audit Log',
+  brands:        'Brands',
   profile:       'Profile',
   new:           'New',
 };

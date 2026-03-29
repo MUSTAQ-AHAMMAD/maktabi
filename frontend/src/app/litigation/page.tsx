@@ -22,19 +22,34 @@ interface LitigationCase {
   financialExposure?: string;
   currency?: string;
   assignedLawyer?: { firstName: string; lastName: string };
+  brand?: { id: string; name: string; code: string; color: string };
+}
+
+interface Brand {
+  id: string;
+  name: string;
+  code: string;
+  color: string;
 }
 
 export default function LitigationPage() {
   const [cases, setCases] = useState<LitigationCase[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [brandFilter, setBrandFilter] = useState('all');
+
+  useEffect(() => {
+    api.get('/brands').then(r => setBrands(r.data)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const params: Record<string, string> = {};
     if (statusFilter !== 'all') params.status = statusFilter;
+    if (brandFilter !== 'all') params.brandId = brandFilter;
     api.get('/litigation', { params }).then(r => setCases(r.data)).catch(() => {}).finally(() => setLoading(false));
-  }, [statusFilter]);
+  }, [statusFilter, brandFilter]);
 
   const filtered = cases.filter(c =>
     c.caseNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -89,6 +104,22 @@ export default function LitigationPage() {
                 <SelectItem value="CLOSED">Closed</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={brandFilter} onValueChange={setBrandFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Brands" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Brands</SelectItem>
+                {brands.map(b => (
+                  <SelectItem key={b.id} value={b.id}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+                      {b.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Link href="/litigation/new">
             <Button className="shrink-0"><Plus className="w-4 h-4 mr-2" />New Case</Button>
@@ -116,6 +147,7 @@ export default function LitigationPage() {
                 <tr className="bg-muted/40 border-b border-border">
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide">Case #</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden md:table-cell">Type</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden lg:table-cell">Brand</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden lg:table-cell">Court</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide">Risk</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide">Status</th>
@@ -135,6 +167,16 @@ export default function LitigationPage() {
                     </td>
                     <td className="px-6 py-3.5 hidden md:table-cell">
                       <span className="text-sm text-foreground">{c.caseType}</span>
+                    </td>
+                    <td className="px-6 py-3.5 hidden lg:table-cell">
+                      {c.brand ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: c.brand.color + '20', color: c.brand.color }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.brand.color }} />
+                          {c.brand.code}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-3.5 hidden lg:table-cell">
                       <span className="text-sm text-muted-foreground">{c.courtName}</span>

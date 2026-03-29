@@ -6,10 +6,13 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Briefcase, AlertTriangle, ChevronRight } from 'lucide-react';
 import { differenceInDays } from 'date-fns';
 import api from '@/lib/api';
 import Link from 'next/link';
+
+interface Brand { id: string; name: string; code: string; color: string; }
 
 interface Contract {
   id: string;
@@ -20,16 +23,24 @@ interface Contract {
   currency?: string;
   status: string;
   endDate?: string;
+  brand?: { id: string; name: string; code: string; color: string };
 }
 
 export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brandFilter, setBrandFilter] = useState('all');
+
+  useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   useEffect(() => {
-    api.get('/contracts').then(r => setContracts(r.data)).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+    setLoading(true);
+    const params: Record<string, string> = {};
+    if (brandFilter !== 'all') params.brandId = brandFilter;
+    api.get('/contracts', { params }).then(r => setContracts(r.data)).catch(() => {}).finally(() => setLoading(false));
+  }, [brandFilter]);
 
   const filtered = contracts.filter(c =>
     c.title?.toLowerCase().includes(search.toLowerCase()) ||
@@ -72,9 +83,27 @@ export default function ContractsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Search contracts…" className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
-          <Link href="/contracts/new">
-            <Button className="shrink-0"><Plus className="w-4 h-4 mr-2" />New Contract</Button>
-          </Link>
+          <div className="flex gap-2 items-center">
+            <Select value={brandFilter} onValueChange={setBrandFilter}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="All Brands" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Brands</SelectItem>
+                {brands.map(b => (
+                  <SelectItem key={b.id} value={b.id}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+                      {b.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Link href="/contracts/new">
+              <Button className="shrink-0"><Plus className="w-4 h-4 mr-2" />New Contract</Button>
+            </Link>
+          </div>
         </div>
 
         {/* ── Content ────────────────────────────────────────────────────── */}
@@ -94,6 +123,7 @@ export default function ContractsPage() {
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide">Contract #</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden md:table-cell">Counterparty</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden lg:table-cell">Value</th>
+                  <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden lg:table-cell">Brand</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide">Status</th>
                   <th className="text-left text-xs font-semibold text-muted-foreground px-6 py-3 uppercase tracking-wide hidden xl:table-cell">Expiry</th>
                   <th className="w-10 px-3 py-3 hidden sm:table-cell" />
@@ -118,6 +148,16 @@ export default function ContractsPage() {
                           <span className="text-sm font-medium text-foreground">
                             {c.currency} {Number(c.value).toLocaleString()}
                           </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3.5 hidden lg:table-cell">
+                        {c.brand ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: c.brand.color + '20', color: c.brand.color }}>
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.brand.color }} />
+                            {c.brand.code}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </td>
                       <td className="px-6 py-3.5">
