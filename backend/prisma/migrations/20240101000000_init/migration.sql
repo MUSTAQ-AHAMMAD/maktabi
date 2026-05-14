@@ -23,6 +23,20 @@ CREATE TYPE "FinancialExecutionType" AS ENUM ('AGAINST_COMPANY', 'IN_FAVOR_OF_CO
 CREATE TYPE "FinancialExecutionStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'PARTIAL', 'COMPLETED', 'CANCELLED');
 
 -- CreateTable
+CREATE TABLE "Brand" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "description" TEXT,
+    "color" TEXT NOT NULL DEFAULT '#3B82F6',
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Brand_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -55,6 +69,7 @@ CREATE TABLE "LitigationCase" (
     "createdById" TEXT NOT NULL,
     "slaDeadline" TIMESTAMP(3),
     "closedAt" TIMESTAMP(3),
+    "brandId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -91,6 +106,7 @@ CREATE TABLE "Investigation" (
     "appealNotes" TEXT,
     "slaDeadline" TIMESTAMP(3),
     "closedAt" TIMESTAMP(3),
+    "brandId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -111,6 +127,7 @@ CREATE TABLE "Consultation" (
     "slaDeadline" TIMESTAMP(3),
     "closedAt" TIMESTAMP(3),
     "feedback" TEXT,
+    "brandId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -135,6 +152,7 @@ CREATE TABLE "Contract" (
     "riskScore" INTEGER,
     "clauseNotes" TEXT,
     "signatureReady" BOOLEAN NOT NULL DEFAULT false,
+    "brandId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -154,6 +172,7 @@ CREATE TABLE "FinancialExecution" (
     "dueDate" TIMESTAMP(3),
     "caseId" TEXT,
     "notes" TEXT,
+    "brandId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -255,6 +274,15 @@ CREATE TABLE "Notification" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Brand_name_key" ON "Brand"("name");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Brand_code_key" ON "Brand"("code");
+
+-- CreateIndex
+CREATE INDEX "Brand_isActive_idx" ON "Brand"("isActive");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
@@ -276,6 +304,9 @@ CREATE INDEX "LitigationCase_riskLevel_idx" ON "LitigationCase"("riskLevel");
 CREATE INDEX "LitigationCase_assignedLawyerId_idx" ON "LitigationCase"("assignedLawyerId");
 
 -- CreateIndex
+CREATE INDEX "LitigationCase_brandId_idx" ON "LitigationCase"("brandId");
+
+-- CreateIndex
 CREATE INDEX "Hearing_caseId_idx" ON "Hearing"("caseId");
 
 -- CreateIndex
@@ -285,7 +316,13 @@ CREATE INDEX "Hearing_hearingDate_idx" ON "Hearing"("hearingDate");
 CREATE INDEX "Investigation_status_idx" ON "Investigation"("status");
 
 -- CreateIndex
+CREATE INDEX "Investigation_brandId_idx" ON "Investigation"("brandId");
+
+-- CreateIndex
 CREATE INDEX "Consultation_status_idx" ON "Consultation"("status");
+
+-- CreateIndex
+CREATE INDEX "Consultation_brandId_idx" ON "Consultation"("brandId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Contract_contractNumber_key" ON "Contract"("contractNumber");
@@ -297,10 +334,16 @@ CREATE INDEX "Contract_status_idx" ON "Contract"("status");
 CREATE INDEX "Contract_endDate_idx" ON "Contract"("endDate");
 
 -- CreateIndex
+CREATE INDEX "Contract_brandId_idx" ON "Contract"("brandId");
+
+-- CreateIndex
 CREATE INDEX "FinancialExecution_status_idx" ON "FinancialExecution"("status");
 
 -- CreateIndex
 CREATE INDEX "FinancialExecution_type_idx" ON "FinancialExecution"("type");
+
+-- CreateIndex
+CREATE INDEX "FinancialExecution_brandId_idx" ON "FinancialExecution"("brandId");
 
 -- CreateIndex
 CREATE INDEX "Payment_financialExecutionId_idx" ON "Payment"("financialExecutionId");
@@ -336,16 +379,28 @@ ALTER TABLE "LitigationCase" ADD CONSTRAINT "LitigationCase_assignedLawyerId_fke
 ALTER TABLE "LitigationCase" ADD CONSTRAINT "LitigationCase_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "LitigationCase" ADD CONSTRAINT "LitigationCase_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Hearing" ADD CONSTRAINT "Hearing_caseId_fkey" FOREIGN KEY ("caseId") REFERENCES "LitigationCase"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Investigation" ADD CONSTRAINT "Investigation_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Investigation" ADD CONSTRAINT "Investigation_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Consultation" ADD CONSTRAINT "Consultation_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Consultation" ADD CONSTRAINT "Consultation_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Contract" ADD CONSTRAINT "Contract_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Contract" ADD CONSTRAINT "Contract_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Payment" ADD CONSTRAINT "Payment_financialExecutionId_fkey" FOREIGN KEY ("financialExecutionId") REFERENCES "FinancialExecution"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -364,6 +419,9 @@ ALTER TABLE "Document" ADD CONSTRAINT "Document_contractId_fkey" FOREIGN KEY ("c
 
 -- AddForeignKey
 ALTER TABLE "Document" ADD CONSTRAINT "Document_financialId_fkey" FOREIGN KEY ("financialId") REFERENCES "FinancialExecution"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "FinancialExecution" ADD CONSTRAINT "FinancialExecution_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ApprovalLog" ADD CONSTRAINT "ApprovalLog_approverId_fkey" FOREIGN KEY ("approverId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
