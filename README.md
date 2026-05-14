@@ -417,3 +417,55 @@ npm run cap:ios
 ```
 
 See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-reload workflow, and publishing guidance.
+
+---
+
+## 🔧 Troubleshooting
+
+### PostgreSQL initialization error
+
+If you see this error when starting Docker containers:
+
+```
+Database is uninitialized and superuser password is not specified.
+You must specify POSTGRES_PASSWORD to a non-empty value for the superuser.
+```
+
+This occurs when an **old Docker volume** exists from a previous failed PostgreSQL initialization. The solution is to remove the old volume:
+
+#### Option 1: Reset database volume (data will be lost)
+
+```bash
+# Stop all containers
+docker-compose down
+
+# Remove the postgres volume
+docker volume rm maktabi_postgres_data
+
+# Start containers again
+docker-compose up -d
+```
+
+#### Option 2: Full cleanup (removes all containers, volumes, and images)
+
+```bash
+# Stop and remove all containers, networks, volumes for this project
+docker-compose down -v
+
+# Optional: Remove images as well to rebuild from scratch
+docker-compose down -v --rmi all
+
+# Start fresh
+docker-compose up -d
+```
+
+#### For docker-compose.db-only.yml
+
+If using the database-only setup:
+
+```bash
+docker-compose -f docker-compose.db-only.yml down -v
+docker-compose -f docker-compose.db-only.yml up -d
+```
+
+> **Note:** The `-v` flag removes volumes. Any data in the PostgreSQL database will be deleted. The database will be recreated with the seed data when you restart the containers.
