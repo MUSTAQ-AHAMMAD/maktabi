@@ -36,6 +36,16 @@ maktabi/
 
 ## 🚀 Quick Start
 
+> **⚠️ IMPORTANT: After `git pull`**
+>
+> If you previously ran this project and just pulled updates, you **must** clean the Docker volumes to avoid database initialization errors:
+> ```bash
+> docker-compose down -v
+> docker-compose up -d
+> ```
+>
+> The `-v` flag removes old volumes that may cause "Database is uninitialized" errors. Your database will be recreated with fresh seed data.
+
 ### Option 1: Docker Compose (Recommended)
 
 > **No PostgreSQL installation required.** Docker bundles everything — database, backend, and frontend.
@@ -58,6 +68,8 @@ Use this option if you want to run the backend and frontend directly with Node.j
 - Docker Desktop
 
 #### 1. Start only the PostgreSQL container
+
+> **⚠️ If you previously ran this project:** Clean old volumes first with `docker-compose -f docker-compose.db-only.yml down -v`
 
 ```bash
 docker-compose -f docker-compose.db-only.yml up -d
