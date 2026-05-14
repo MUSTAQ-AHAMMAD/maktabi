@@ -1,87 +1,56 @@
 #!/bin/bash
-
-# Docker Rebuild Script for Maktabi Project
-# Forces a complete rebuild of all Docker images
+#
+# Docker Rebuild Script for Maktabi
+# This script completely rebuilds Docker images without cache to fix persistent issues
+#
 
 set -e
 
-echo "🔨 Maktabi Docker Rebuild Script"
-echo "================================="
-echo ""
-echo "This script will:"
-echo "  1. Stop all running containers"
-echo "  2. Remove old images"
-echo "  3. Rebuild images from scratch (no cache)"
-echo "  4. Start the services"
+echo "========================================"
+echo "Maktabi Docker Complete Rebuild"
+echo "========================================"
 echo ""
 
-# Function to check if docker-compose command exists
-check_docker_compose() {
-    if command -v docker-compose &> /dev/null; then
-        echo "docker-compose"
-    elif docker compose version &> /dev/null 2>&1; then
-        echo "docker compose"
-    else
-        echo "ERROR: Neither 'docker-compose' nor 'docker compose' found."
-        exit 1
-    fi
-}
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
 
-DOCKER_COMPOSE=$(check_docker_compose)
-echo "✓ Using: $DOCKER_COMPOSE"
+echo -e "${YELLOW}Step 1: Stopping all containers...${NC}"
+docker-compose down
+echo -e "${GREEN}✓ Containers stopped${NC}"
 echo ""
 
-# Step 1: Stop containers
-echo "Step 1: Stopping all containers..."
-$DOCKER_COMPOSE down || true
-echo "✓ Containers stopped"
+echo -e "${YELLOW}Step 2: Removing Maktabi images...${NC}"
+# Remove images if they exist (don't fail if they don't)
+docker rmi maktabi-backend:latest 2>/dev/null || echo "  Backend image not found (OK)"
+docker rmi maktabi-frontend:latest 2>/dev/null || echo "  Frontend image not found (OK)"
+echo -e "${GREEN}✓ Images removed${NC}"
 echo ""
 
-# Step 2: Remove containers
-echo "Step 2: Removing containers..."
-docker rm -f maktabi_backend maktabi_frontend maktabi_postgres 2>/dev/null || true
-echo "✓ Containers removed"
+echo -e "${YELLOW}Step 3: Rebuilding images without cache...${NC}"
+docker-compose build --no-cache
+echo -e "${GREEN}✓ Images rebuilt${NC}"
 echo ""
 
-# Step 3: Remove images
-echo "Step 3: Removing old images..."
-docker rmi -f maktabi-backend:latest 2>/dev/null || true
-docker rmi -f maktabi-frontend:latest 2>/dev/null || true
-# Remove any dangling images from previous builds
-docker images -f "dangling=true" -q | xargs -r docker rmi -f 2>/dev/null || true
-echo "✓ Old images removed"
+echo -e "${YELLOW}Step 4: Starting services...${NC}"
+docker-compose up -d
+echo -e "${GREEN}✓ Services started${NC}"
 echo ""
 
-# Step 4: Rebuild
-echo "Step 4: Rebuilding images (no cache)..."
-$DOCKER_COMPOSE build --no-cache
-echo "✓ Images rebuilt"
+echo "========================================"
+echo -e "${GREEN}✓ Rebuild complete!${NC}"
+echo "========================================"
 echo ""
-
-# Step 5: Start services
-echo "Step 5: Starting services..."
-$DOCKER_COMPOSE up -d
-echo "✓ Services started"
+echo "Checking service status..."
+docker-compose ps
 echo ""
-
-# Step 6: Show status
-echo "Waiting for services to initialize..."
-sleep 5
+echo "To view logs, run:"
+echo "  docker-compose logs -f backend"
+echo "  docker-compose logs -f frontend"
 echo ""
-$DOCKER_COMPOSE ps
-echo ""
-
-# Step 7: Show logs
-echo "Recent logs:"
-echo "============"
-$DOCKER_COMPOSE logs --tail=20
-echo ""
-
-echo "✅ Rebuild complete!"
-echo ""
-echo "Useful commands:"
-echo "  View logs:        $DOCKER_COMPOSE logs -f"
-echo "  Check status:     $DOCKER_COMPOSE ps"
-echo "  Stop services:    $DOCKER_COMPOSE down"
-echo "  Restart service:  $DOCKER_COMPOSE restart backend"
-echo ""
+echo "Services should be available at:"
+echo "  Frontend: http://localhost:3000"
+echo "  Backend:  http://localhost:3001"
+echo "  Swagger:  http://localhost:3001/api/docs"
