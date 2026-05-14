@@ -11,7 +11,11 @@
 #     docker-compose down -v
 #     docker-compose up -d
 #
-version: '3.8'
+#   If you see "port is already allocated" error, it means another service is using
+#   the port. Stop the conflicting service or change the port mapping in this file.
+#   For example, to use port 3002 instead of 3001 for backend:
+#     ports:
+#       - "3002:3001"
 
 services:
   postgres:
