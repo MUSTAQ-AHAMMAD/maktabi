@@ -422,6 +422,105 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 ## 🔧 Troubleshooting
 
+### Port already in use
+
+If you see an error like:
+
+```
+Error response from daemon: ports are not available: exposing port TCP 0.0.0.0:3001 -> 127.0.0.1:0:
+listen tcp 0.0.0.0:3001: bind: Only one usage of each socket address (protocol/network address/port)
+is normally permitted.
+```
+
+This means another application is already using port 3001 (backend), 3000 (frontend), or 5432 (PostgreSQL).
+
+#### Solution 1: Stop the conflicting service
+
+**Find what's using the port:**
+
+**Linux / macOS:**
+```bash
+# Check what's using port 3001
+lsof -i :3001
+
+# Check what's using port 3000
+lsof -i :3000
+
+# Check what's using port 5432
+lsof -i :5432
+```
+
+**Windows (PowerShell):**
+```powershell
+# Check what's using port 3001
+Get-NetTCPConnection -LocalPort 3001 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3001).OwningProcess
+
+# Check what's using port 3000
+Get-NetTCPConnection -LocalPort 3000 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess
+
+# Check what's using port 5432
+Get-NetTCPConnection -LocalPort 5432 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 5432).OwningProcess
+```
+
+**Windows (Command Prompt):**
+```cmd
+# Check what's using port 3001
+netstat -ano | findstr :3001
+
+# Check what's using port 3000
+netstat -ano | findstr :3000
+
+# Check what's using port 5432
+netstat -ano | findstr :5432
+```
+
+Then stop the process using that port. Common causes:
+- A local development server is running (`npm run start:dev` or `npm run dev`)
+- A previous Docker container is still running
+- Another PostgreSQL instance is installed and running
+
+**Stop local development servers:**
+```bash
+# Stop any running npm processes
+# Press Ctrl+C in the terminal where they're running, or close the terminal
+```
+
+**Stop Docker containers:**
+```bash
+docker-compose down
+# or for specific containers
+docker stop maktabi_backend maktabi_frontend maktabi_postgres
+```
+
+#### Solution 2: Change the port mapping
+
+If you can't stop the conflicting service, edit `docker-compose.yml` to use different ports:
+
+```yaml
+backend:
+  ports:
+    - "3002:3001"  # Changed from 3001:3001 - backend now accessible on localhost:3002
+
+frontend:
+  ports:
+    - "3001:3000"  # Changed from 3000:3000 - frontend now accessible on localhost:3001
+
+postgres:
+  ports:
+    - "5433:5432"  # Changed from 5432:5432 - database now accessible on localhost:5433
+```
+
+**Important:** If you change the backend port, also update `NEXT_PUBLIC_API_URL` in the frontend service:
+
+```yaml
+frontend:
+  environment:
+    NEXT_PUBLIC_API_URL: "http://localhost:3002"  # Match the new backend port
+```
+
 ### Docker image deletion error
 
 If you see this error when trying to delete Docker images:
