@@ -422,6 +422,30 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 ## 🔧 Troubleshooting
 
+> **📖 For comprehensive Docker troubleshooting, see [docs/DOCKER_TROUBLESHOOTING.md](docs/DOCKER_TROUBLESHOOTING.md)**
+
+### Docker container keeps restarting
+
+If you see the backend container status as "Restarting" with errors like:
+```
+exec ./docker-entrypoint.sh: no such file or directory
+```
+
+**This means you're running an old cached Docker image.** You need to rebuild:
+
+```bash
+# Quick fix: Use the rebuild script
+./docker-rebuild.sh
+
+# Or manually
+docker compose down
+docker rmi maktabi-backend:latest
+docker compose build --no-cache
+docker compose up -d
+```
+
+See [docs/DOCKER_TROUBLESHOOTING.md](docs/DOCKER_TROUBLESHOOTING.md) for more details.
+
 ### Port already in use
 
 If you see an error like:
