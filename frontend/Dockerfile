@@ -1,11 +1,13 @@
-FROM node:20-alpine AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
+# Install dependencies first
 COPY package*.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps --no-audit --no-fund || \
+    (npm cache clean --force && npm install --legacy-peer-deps --no-audit --no-fund)
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/public ./public
