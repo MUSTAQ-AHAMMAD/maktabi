@@ -1,7 +1,17 @@
 import { PrismaClient } from '@prisma/client';
+import { withAdapter } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import * as bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+// Create a connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+// Initialize PrismaClient with the adapter
+const prisma = new PrismaClient({
+  adapter: withAdapter(pool),
+});
 
 async function main() {
   const hash = async (p: string) => bcrypt.hash(p, 10);
