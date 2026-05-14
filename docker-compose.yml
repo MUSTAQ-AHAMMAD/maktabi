@@ -53,8 +53,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: >
-      sh -c "npx prisma migrate deploy && node dist/prisma/seed.js && node dist/src/main"
 
   frontend:
     build:
