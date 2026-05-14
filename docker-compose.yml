@@ -1,3 +1,16 @@
+# Maktabi Full Stack Docker Compose Configuration
+#
+# Starts PostgreSQL, backend, and frontend services.
+#
+# Usage:
+#   docker-compose up -d
+#
+# Troubleshooting:
+#   If you see "Database is uninitialized and superuser password is not specified",
+#   it means an old Docker volume exists. Fix it by running:
+#     docker-compose down -v
+#     docker-compose up -d
+#
 version: '3.8'
 
 services:

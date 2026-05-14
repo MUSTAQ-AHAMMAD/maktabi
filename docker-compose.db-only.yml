@@ -9,6 +9,12 @@
 # The database will be reachable at localhost:5432 with the credentials that
 # match the defaults in backend/.env.example.
 #
+# Troubleshooting:
+#   If you see "Database is uninitialized and superuser password is not specified",
+#   it means an old Docker volume exists. Fix it by running:
+#     docker-compose -f docker-compose.db-only.yml down -v
+#     docker-compose -f docker-compose.db-only.yml up -d
+#
 # ⚠️  FOR LOCAL DEVELOPMENT ONLY.
 # These credentials are intentionally simple defaults shared with .env.example
 # and docker-compose.yml so that no extra configuration is needed for a first
