@@ -295,7 +295,7 @@ The login screen features the Maktabi branding, email/password fields, and quick
 The role-based dashboard shows KPI cards (Total Cases, Active Cases, Contracts, Pending Consultations), Financial Exposure summary, and Risk Distribution chart.
 
 ### Litigation Cases
-![Litigation Cases](docs/screenshots/03-litigation.png)
+![Litigation Cases](docs/screenshots/03-litigation-list.png)
 
 Browse, search, and filter all litigation cases. The top-right **+ New Case** button opens the case creation form.
 
@@ -305,34 +305,74 @@ Browse, search, and filter all litigation cases. The top-right **+ New Case** bu
 Multi-field form to register a new litigation case with case number, type, court, assigned lawyer, risk level, and more.
 
 ### Investigations
-![Investigations](docs/screenshots/05-investigations.png)
+![Investigations](docs/screenshots/05-investigations-list.png)
 
 HR disciplinary investigation tracker with severity classification and confidentiality controls.
 
+### New Investigation Form
+![New Investigation](docs/screenshots/06-investigations-new.png)
+
+Create a new investigation with subject, type, severity classification, and confidentiality settings.
+
 ### Consultations
-![Consultations](docs/screenshots/06-consultations.png)
+![Consultations](docs/screenshots/07-consultations-list.png)
 
 Legal opinion request management with SLA tracking and knowledge tagging.
 
+### New Consultation Form
+![New Consultation](docs/screenshots/08-consultations-new.png)
+
+Submit a new legal consultation request with topic, priority, and department details.
+
 ### Contracts
-![Contracts](docs/screenshots/07-contracts.png)
+![Contracts](docs/screenshots/09-contracts-list.png)
 
 Full contract lifecycle management — view active contracts, expiry alerts, and multi-step approval status.
 
+### New Contract Form
+![New Contract](docs/screenshots/10-contracts-new.png)
+
+Create a new contract with parties, value, dates, and approval workflow configuration.
+
 ### Financial Executions
-![Financial](docs/screenshots/08-financial.png)
+![Financial](docs/screenshots/11-financial-list.png)
 
 Track financial execution orders, record payments, and monitor payment progress.
 
+### New Financial Record Form
+![New Financial Record](docs/screenshots/12-financial-new.png)
+
+Create a new financial execution record with amount, type, and linked case details.
+
+### Calendar
+![Calendar](docs/screenshots/13-calendar.png)
+
+Monthly calendar view showing hearings, contract expiries, and other important legal deadlines.
+
 ### User Directory
-![Users](docs/screenshots/09-users.png)
+![Users](docs/screenshots/14-users.png)
 
 Admin view of all platform users with their roles and contact details.
 
+### Brands Management
+![Brands](docs/screenshots/15-brands.png)
+
+Manage organizational brands (IBRAQ, MATCH, FEELIN, SALFA) with brand-specific case filtering.
+
+### Notifications
+![Notifications](docs/screenshots/16-notifications.png)
+
+Notification center with real-time alerts for case updates, deadlines, and workflow actions.
+
 ### Audit Log
-![Audit Log](docs/screenshots/10-audit.png)
+![Audit Log](docs/screenshots/17-audit.png)
 
 Chronological audit trail of all system actions, accessible to Admin and CEO roles.
+
+### Profile
+![Profile](docs/screenshots/18-profile.png)
+
+User profile page for viewing and editing personal information and preferences.
 
 ---
 
