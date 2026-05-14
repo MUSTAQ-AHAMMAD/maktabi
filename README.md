@@ -422,6 +422,51 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 ## 🔧 Troubleshooting
 
+### Docker image deletion error
+
+If you see this error when trying to delete Docker images:
+
+```
+Image maktabi-backend:latest is in use. Delete the container that's using it and try again.
+```
+
+This occurs when containers are still running or stopped containers still reference the image. Use the cleanup script to safely remove containers and images:
+
+#### Automated cleanup (recommended)
+
+**Linux / macOS:**
+```bash
+./docker-cleanup.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+.\docker-cleanup.ps1
+```
+
+#### Manual cleanup
+
+**Stop and remove containers:**
+```bash
+docker-compose down
+docker rm -f maktabi_backend maktabi_frontend maktabi_postgres
+```
+
+**Remove images:**
+```bash
+docker rmi maktabi-backend:latest maktabi-frontend:latest
+```
+
+**Remove volumes (optional - deletes database data):**
+```bash
+docker volume rm maktabi_postgres_data
+```
+
+**Remove all project resources at once:**
+```bash
+docker-compose down -v --rmi all
+```
+
 ### PostgreSQL initialization error
 
 If you see this error when starting Docker containers:
