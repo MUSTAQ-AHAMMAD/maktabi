@@ -2,6 +2,9 @@
 
 A production-ready Enterprise Legal Management & Workflow Automation Platform built with Next.js, NestJS, PostgreSQL, and Prisma.
 
+> **🚨 Just pulled updates? Getting database errors?**
+> Run: `docker-compose down -v && docker-compose up -d` to clean old volumes. [See full fix](#troubleshooting)
+
 ## 🏗 Architecture
 
 ```
@@ -436,14 +439,14 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 ### PostgreSQL initialization error
 
-If you see this error when starting Docker containers:
+**Most common after `git pull`:** If you see this error when starting Docker containers:
 
 ```
 Database is uninitialized and superuser password is not specified.
 You must specify POSTGRES_PASSWORD to a non-empty value for the superuser.
 ```
 
-This occurs when an **old Docker volume** exists from a previous failed PostgreSQL initialization. The solution is to remove the old volume:
+This occurs when an **old Docker volume** exists from before the PostgreSQL password was configured. The solution is to remove the old volume:
 
 #### Option 1: Reset database volume (data will be lost)
 
