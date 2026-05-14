@@ -521,6 +521,86 @@ frontend:
     NEXT_PUBLIC_API_URL: "http://localhost:3002"  # Match the new backend port
 ```
 
+### Backend not responding (ERR_EMPTY_RESPONSE)
+
+If the frontend shows errors like `net::ERR_EMPTY_RESPONSE` when trying to connect to the backend API at `http://localhost:3001`, this means the backend container has crashed or failed to start.
+
+#### Diagnosis
+
+**Check backend container status:**
+```bash
+docker ps -a | grep maktabi_backend
+```
+
+If the container shows as "Exited" or keeps restarting, view the logs:
+
+```bash
+docker logs maktabi_backend
+```
+
+#### Common causes and solutions
+
+**1. Database connection failure**
+
+The backend depends on PostgreSQL being ready. If migrations fail or the database isn't accessible, the backend won't start.
+
+**Solution:**
+```bash
+# Stop all containers
+docker-compose down
+
+# Remove volumes to reset the database
+docker volume rm maktabi_postgres_data
+
+# Restart with fresh database
+docker-compose up -d
+
+# Watch the backend logs
+docker logs -f maktabi_backend
+```
+
+**2. Prisma client generation or migration issues**
+
+If you see errors related to Prisma or database schema:
+
+```bash
+# Rebuild the backend image from scratch
+docker-compose down
+docker rmi maktabi-backend:latest
+docker-compose up -d --build
+
+# Watch the logs
+docker logs -f maktabi_backend
+```
+
+**3. Seed script failures**
+
+The backend tries to seed demo data on first start. If the seed fails (e.g., data already exists), the new entrypoint script will continue anyway. However, if you see seed-related errors:
+
+```bash
+# The seed is now optional and won't block startup
+# Check logs to confirm the backend started despite seed warnings
+docker logs maktabi_backend
+```
+
+**4. Port already in use**
+
+If another process is using port 3001, the backend container may fail. See the "Port already in use" section above.
+
+**5. Check backend health manually**
+
+Once the container is running, verify the backend is responding:
+
+```bash
+# Should return API documentation
+curl http://localhost:3001/api/docs
+
+# Should return 200 OK or 401 Unauthorized (both mean backend is working)
+curl http://localhost:3001/auth/login
+```
+
+If curl works but the browser doesn't, check CORS settings or try clearing browser cache.
+
 ### Docker image deletion error
 
 If you see this error when trying to delete Docker images:
