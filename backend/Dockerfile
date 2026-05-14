@@ -35,4 +35,4 @@ ENV PRISMA_CLI_BINARY_TARGETS="debian-openssl-3.0.x"
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING="1"
 
 EXPOSE 3001
-CMD ["./docker-entrypoint.sh"]
+ENTRYPOINT ["./docker-entrypoint.sh"]
