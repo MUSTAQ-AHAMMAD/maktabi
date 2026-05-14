@@ -422,7 +422,7 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 ## 🔧 Troubleshooting
 
-> **📖 For comprehensive Docker troubleshooting, see [docs/DOCKER_TROUBLESHOOTING.md](docs/DOCKER_TROUBLESHOOTING.md)**
+> **📖 For comprehensive Docker troubleshooting, see [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md)**
 
 ### Docker container keeps restarting
 
@@ -444,7 +444,7 @@ docker compose build --no-cache
 docker compose up -d
 ```
 
-See [docs/DOCKER_TROUBLESHOOTING.md](docs/DOCKER_TROUBLESHOOTING.md) for more details.
+See [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md) for more details and explanation of the fix.
 
 ### Port already in use
 
