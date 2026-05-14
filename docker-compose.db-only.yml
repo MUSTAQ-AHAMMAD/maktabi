@@ -15,12 +15,14 @@
 #     docker-compose -f docker-compose.db-only.yml down -v
 #     docker-compose -f docker-compose.db-only.yml up -d
 #
+#   If you see "port is already allocated" error on port 5432, another PostgreSQL
+#   instance is running. Stop it or change the port mapping to "5433:5432".
+#
 # ⚠️  FOR LOCAL DEVELOPMENT ONLY.
 # These credentials are intentionally simple defaults shared with .env.example
 # and docker-compose.yml so that no extra configuration is needed for a first
 # run.  NEVER use these values in a production or internet-facing deployment.
 
-version: '3.8'
 
 services:
   postgres:
