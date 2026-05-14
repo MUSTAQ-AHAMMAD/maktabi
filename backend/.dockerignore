@@ -1,0 +1,59 @@
+# Dependencies (exclude node_modules but keep package-lock.json for reproducible builds)
+node_modules
+npm-debug.log
+yarn-error.log
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs (dist is built inside Docker, keep .tsbuildinfo excluded)
+*.tsbuildinfo
+
+# Testing
+coverage
+.nyc_output
+test
+tests
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE and OS files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+.circleci
+
+# Documentation
+README.md
+CHANGELOG.md
+docs
+
+# Prisma
+prisma/migrations/*.sql
+!prisma/schema.prisma
+
+# Other
+*.log
+.cache
+.temp
+tmp
+temp
