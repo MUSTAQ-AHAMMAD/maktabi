@@ -1,7 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+// Initialize PrismaClient with the adapter
+const adapter = new PrismaPg(process.env.DATABASE_URL!);
+const prisma = new PrismaClient({
+  adapter,
+});
 
 async function main() {
   const hash = async (p: string) => bcrypt.hash(p, 10);
