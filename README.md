@@ -428,23 +428,32 @@ See **[mobile/README.md](mobile/README.md)** for full setup instructions, live-r
 
 If you see the backend container status as "Restarting" with errors like:
 ```
-exec ./docker-entrypoint.sh: no such file or directory
+exec /app/docker-entrypoint.sh: no such file or directory
 ```
 
 **This means you're running an old cached Docker image.** You need to rebuild:
 
 ```bash
-# Quick fix: Use the rebuild script
-./docker-rebuild.sh
+# Quick fix: Use the quick fix script (backend only - fastest)
+./QUICKFIX-DOCKER.sh
 
-# Or manually
-docker compose down
-docker rmi maktabi-backend:latest
-docker compose build --no-cache
-docker compose up -d
+# Or full rebuild (all services)
+./rebuild-docker.sh
+
+# Or manually rebuild backend only
+docker-compose down
+docker rmi maktabi-backend:latest backend-backend:latest 2>/dev/null || true
+docker-compose build --no-cache backend
+docker-compose up -d
+
+# Or manually rebuild everything
+docker-compose down
+docker images | grep maktabi | awk '{print $3}' | xargs -r docker rmi -f
+docker-compose build --no-cache
+docker-compose up -d
 ```
 
-See [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md) for more details and explanation of the fix.
+**Why this happens:** The docker-entrypoint.sh script needs to be executable with Unix line endings. Old cached images may have been built before this was properly configured.
 
 ### Port already in use
 
