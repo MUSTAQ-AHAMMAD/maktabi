@@ -1,9 +1,58 @@
-# Ensure shell scripts always use LF line endings (Unix-style)
-# This prevents "no such file or directory" errors in Docker containers
+# ============================================================================
+# Git Attributes Configuration for Cross-Platform Docker Compatibility
+# ============================================================================
+# This file ensures consistent line endings across Windows, macOS, and Linux
+# to prevent "exec format error" and "no such file or directory" in Docker
+# ============================================================================
+
+# Shell scripts MUST use LF (Unix-style) line endings
+# Using CRLF will cause Docker to fail with "no such file or directory"
 *.sh text eol=lf
 docker-entrypoint.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
 
-# Ensure Docker-related files use LF
+# Docker-related files MUST use LF line endings
 Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+*.dockerfile text eol=lf
 .dockerignore text eol=lf
 docker-compose.yml text eol=lf
+docker-compose.*.yml text eol=lf
+
+# Configuration files should use LF
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+.env text eol=lf
+.env.* text eol=lf
+
+# Source code files should use LF
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+
+# Markdown and documentation
+*.md text eol=lf
+*.mdx text eol=lf
+
+# Binary files (mark as binary to prevent line ending conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
