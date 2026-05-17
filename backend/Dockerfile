@@ -12,6 +12,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production=false
 
+# Copy Prisma configuration and schema first
+COPY prisma.config.ts ./
+COPY prisma ./prisma
+
 # Copy application source code
 COPY . .
 
@@ -40,7 +44,8 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Copy Prisma schema for migrations
+# Copy Prisma configuration and schema for migrations
+COPY prisma.config.ts ./
 COPY prisma ./prisma
 
 # Copy and configure entrypoint script with absolute path
