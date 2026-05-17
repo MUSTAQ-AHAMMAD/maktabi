@@ -1,7 +1,7 @@
 import { defineConfig } from 'prisma/config'
 
 export default defineConfig({
-  schema: 'backend/prisma/schema.prisma',
+  schema: 'prisma/schema.prisma',
   migrations: {
     connectionString: process.env.DATABASE_URL!,
   },
