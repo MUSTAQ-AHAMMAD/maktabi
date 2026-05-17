@@ -40,6 +40,15 @@ maktabi/
 
 > **No PostgreSQL installation required.** Docker bundles everything — database, backend, and frontend.
 
+**Optional: Create .env file to avoid warnings**
+
+```bash
+# Create .env file from template (optional but recommended)
+cp .env.example .env
+```
+
+**Start all services:**
+
 ```bash
 docker-compose up -d
 ```
