@@ -121,6 +121,19 @@ model User {
   auditLogs             AuditLog[]             @relation("AuditUser")
   notifications         Notification[]
 
+  createdTasks          Task[]                 @relation("TaskCreator")
+  assignedTasks         Task[]                 @relation("TaskAssignee")
+  createdContacts       Contact[]              @relation("ContactCreator")
+  createdInvoices       Invoice[]              @relation("InvoiceCreator")
+  createdEstimates      Estimate[]             @relation("EstimateCreator")
+  createdExpenses       Expense[]              @relation("ExpenseCreator")
+  createdPoas           PowerOfAttorney[]      @relation("PoaCreator")
+  libraryItems          LibraryItem[]          @relation("LibraryCreator")
+  leaves                Leave[]                @relation("LeaveUser")
+  approvedLeaves        Leave[]                @relation("LeaveApprover")
+  sentMessages          Message[]              @relation("MessageSender")
+  conversationLinks     ConversationParticipant[]
+
   @@index([email])
   @@index([role])
 }
@@ -382,4 +395,430 @@ model Notification {
   user       User     @relation(fields: [userId], references: [id])
 
   @@index([userId, isRead])
+}
+
+// ─── Practice management: Contacts / Clients ─────────────────────────────────
+enum ContactType {
+  CLIENT
+  COUNTERPARTY
+  VENDOR
+  COURT
+  EXPERT
+  OTHER
+}
+
+model Contact {
+  id          String      @id @default(cuid())
+  type        ContactType @default(CLIENT)
+  name        String
+  company     String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  country     String      @default("Saudi Arabia")
+  nationalId  String?
+  notes       String?     @db.Text
+  isActive    Boolean     @default(true)
+  brandId     String?
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  createdBy         User               @relation("ContactCreator", fields: [createdById], references: [id])
+  tasks             Task[]
+  invoices          Invoice[]
+  estimates         Estimate[]
+  expenses          Expense[]
+  powersOfAttorney  PowerOfAttorney[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([brandId])
+}
+
+// ─── Tasks ──────────────────────────────────────────────────────────────────
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?      @db.Text
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  assigneeId  String?
+  createdById String
+  contactId   String?
+  relatedType String?      // polymorphic: LitigationCase | Contract | Consultation | Investigation
+  relatedId   String?
+  brandId     String?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  assignee    User?        @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdBy   User         @relation("TaskCreator", fields: [createdById], references: [id])
+  contact     Contact?     @relation(fields: [contactId], references: [id])
+
+  @@index([status])
+  @@index([priority])
+  @@index([assigneeId])
+  @@index([dueDate])
+}
+
+// ─── Billing: Invoices ──────────────────────────────────────────────────────
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+model Invoice {
+  id          String        @id @default(cuid())
+  number      String        @unique
+  contactId   String
+  status      InvoiceStatus @default(DRAFT)
+  issueDate   DateTime      @default(now())
+  dueDate     DateTime?
+  currency    String        @default("SAR")
+  taxRate     Decimal       @default(15) @db.Decimal(5, 2)
+  subtotal    Decimal       @default(0) @db.Decimal(15, 2)
+  taxAmount   Decimal       @default(0) @db.Decimal(15, 2)
+  total       Decimal       @default(0) @db.Decimal(15, 2)
+  paidAmount  Decimal       @default(0) @db.Decimal(15, 2)
+  notes       String?       @db.Text
+  brandId     String?
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  contact     Contact          @relation(fields: [contactId], references: [id])
+  createdBy   User             @relation("InvoiceCreator", fields: [createdById], references: [id])
+  items       InvoiceItem[]
+  payments    InvoicePayment[]
+
+  @@index([status])
+  @@index([contactId])
+  @@index([dueDate])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  description String
+  quantity    Decimal @default(1) @db.Decimal(10, 2)
+  unitPrice   Decimal @db.Decimal(15, 2)
+  amount      Decimal @db.Decimal(15, 2)
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+model InvoicePayment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  amount      Decimal  @db.Decimal(15, 2)
+  paymentDate DateTime @default(now())
+  method      String   @default("BANK_TRANSFER")
+  reference   String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+// ─── Billing: Estimates / Quotes ────────────────────────────────────────────
+enum EstimateStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CONVERTED
+}
+
+model Estimate {
+  id          String         @id @default(cuid())
+  number      String         @unique
+  contactId   String
+  status      EstimateStatus @default(DRAFT)
+  issueDate   DateTime       @default(now())
+  validUntil  DateTime?
+  currency    String         @default("SAR")
+  taxRate     Decimal        @default(15) @db.Decimal(5, 2)
+  subtotal    Decimal        @default(0) @db.Decimal(15, 2)
+  taxAmount   Decimal        @default(0) @db.Decimal(15, 2)
+  total       Decimal        @default(0) @db.Decimal(15, 2)
+  notes       String?        @db.Text
+  convertedInvoiceId String?
+  brandId     String?
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  contact     Contact        @relation(fields: [contactId], references: [id])
+  createdBy   User           @relation("EstimateCreator", fields: [createdById], references: [id])
+  items       EstimateItem[]
+
+  @@index([status])
+  @@index([contactId])
+}
+
+model EstimateItem {
+  id          String   @id @default(cuid())
+  estimateId  String
+  description String
+  quantity    Decimal  @default(1) @db.Decimal(10, 2)
+  unitPrice   Decimal  @db.Decimal(15, 2)
+  amount      Decimal  @db.Decimal(15, 2)
+
+  estimate    Estimate @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+
+  @@index([estimateId])
+}
+
+// ─── Billing: Expenses ──────────────────────────────────────────────────────
+enum ExpenseCategory {
+  COURT_FEES
+  FILING
+  TRAVEL
+  SALARY
+  OFFICE
+  MARKETING
+  SOFTWARE
+  CONSULTANT
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(cuid())
+  title       String
+  category    ExpenseCategory @default(OTHER)
+  amount      Decimal         @db.Decimal(15, 2)
+  currency    String          @default("SAR")
+  date        DateTime        @default(now())
+  vendor      String?
+  contactId   String?
+  relatedType String?
+  relatedId   String?
+  notes       String?         @db.Text
+  brandId     String?
+  createdById String
+  createdAt   DateTime        @default(now())
+  deletedAt   DateTime?
+
+  contact     Contact?        @relation(fields: [contactId], references: [id])
+  createdBy   User            @relation("ExpenseCreator", fields: [createdById], references: [id])
+
+  @@index([category])
+  @@index([date])
+  @@index([brandId])
+}
+
+// ─── Billing: Treasury ──────────────────────────────────────────────────────
+enum TreasuryAccountType {
+  BANK
+  CASH
+  CARD
+}
+
+enum TreasuryTxnType {
+  CREDIT
+  DEBIT
+}
+
+model TreasuryAccount {
+  id        String              @id @default(cuid())
+  name      String
+  type      TreasuryAccountType @default(BANK)
+  currency  String              @default("SAR")
+  balance   Decimal             @default(0) @db.Decimal(15, 2)
+  isActive  Boolean             @default(true)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  transactions TreasuryTransaction[]
+}
+
+model TreasuryTransaction {
+  id          String          @id @default(cuid())
+  accountId   String
+  type        TreasuryTxnType
+  amount      Decimal         @db.Decimal(15, 2)
+  description String
+  date        DateTime        @default(now())
+  reference   String?
+  createdAt   DateTime        @default(now())
+
+  account     TreasuryAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([date])
+}
+
+// ─── Powers of Attorney ─────────────────────────────────────────────────────
+enum PoaStatus {
+  ACTIVE
+  EXPIRING
+  EXPIRED
+  REVOKED
+}
+
+model PowerOfAttorney {
+  id          String    @id @default(cuid())
+  number      String    @unique
+  contactId   String
+  grantor     String
+  grantee     String
+  scope       String    @db.Text
+  issueDate   DateTime  @default(now())
+  expiryDate  DateTime?
+  status      PoaStatus @default(ACTIVE)
+  notaryRef   String?
+  notes       String?   @db.Text
+  brandId     String?
+  createdById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  contact     Contact   @relation(fields: [contactId], references: [id])
+  createdBy   User      @relation("PoaCreator", fields: [createdById], references: [id])
+
+  @@index([status])
+  @@index([contactId])
+}
+
+// ─── Legal Library ──────────────────────────────────────────────────────────
+enum LibraryType {
+  TEMPLATE
+  REGULATION
+  PRECEDENT
+  GUIDE
+  FORM
+  CONTRACT_TEMPLATE
+}
+
+model LibraryItem {
+  id          String      @id @default(cuid())
+  title       String
+  type        LibraryType @default(TEMPLATE)
+  category    String?
+  description String?     @db.Text
+  content     String?     @db.Text
+  fileUrl     String?
+  tags        String[]
+  isPublic    Boolean     @default(true)
+  views       Int         @default(0)
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  createdBy   User        @relation("LibraryCreator", fields: [createdById], references: [id])
+
+  @@index([type])
+  @@index([category])
+}
+
+// ─── Internal Messages ──────────────────────────────────────────────────────
+model Conversation {
+  id        String   @id @default(cuid())
+  name      String?
+  isGroup   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String    @id @default(cuid())
+  conversationId String
+  userId         String
+  lastReadAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id])
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  body           String   @db.Text
+  createdAt      DateTime @default(now())
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId])
+}
+
+// ─── HR: Leaves ─────────────────────────────────────────────────────────────
+enum LeaveType {
+  ANNUAL
+  SICK
+  UNPAID
+  MATERNITY
+  PATERNITY
+  EMERGENCY
+  OTHER
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Leave {
+  id         String      @id @default(cuid())
+  userId     String
+  type       LeaveType   @default(ANNUAL)
+  startDate  DateTime
+  endDate    DateTime
+  days       Int
+  reason     String?
+  status     LeaveStatus @default(PENDING)
+  approverId String?
+  decidedAt  DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  user       User        @relation("LeaveUser", fields: [userId], references: [id])
+  approver   User?       @relation("LeaveApprover", fields: [approverId], references: [id])
+
+  @@index([userId])
+  @@index([status])
 }

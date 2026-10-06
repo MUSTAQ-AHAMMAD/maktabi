@@ -5,9 +5,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Sidebar } from './sidebar';
 import { Topnav } from './topnav';
+import { CommandPalette } from '@/components/command-palette';
 import { useAuthStore } from '@/store/auth.store';
 import { getStoredUser, getToken } from '@/lib/auth';
 import { useSidebarStore } from '@/store/sidebar.store';
+import { useLocale } from '@/i18n/locale-provider';
 import { ChevronRight, Home } from 'lucide-react';
 import Link from 'next/link';
 
@@ -62,6 +64,8 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
   const pathname = usePathname();
   const { user, setAuth } = useAuthStore();
   const { collapsed } = useSidebarStore();
+  const { dir } = useLocale();
+  const sidebarWidth = collapsed ? '64px' : '260px';
 
   useEffect(() => {
     const storedUser = getStoredUser();
@@ -79,8 +83,9 @@ export function AppLayout({ children, title }: { children: React.ReactNode; titl
 
   return (
     <div className="flex min-h-screen bg-background">
+      <CommandPalette />
       <Sidebar />
-      <div className="flex-1 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" style={{ marginLeft: collapsed ? '64px' : '260px' }}>
+      <div className="flex-1 flex flex-col transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" style={dir === 'rtl' ? { marginRight: sidebarWidth } : { marginLeft: sidebarWidth }}>
         <Topnav title={title} />
         <main className="flex-1 p-6 overflow-auto">
           <Breadcrumb />

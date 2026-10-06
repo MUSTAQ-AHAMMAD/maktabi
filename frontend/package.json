@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 9000",
     "build": "next build",
     "build:static": "next build && npx cap sync",
-    "start": "next start",
+    "start": "next start -p 9000",
     "lint": "eslint",
     "cap:sync": "npx cap sync",
     "cap:android": "npx cap open android",

@@ -9,48 +9,103 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
+  // Skip seed in production
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('⚠️  Skipping database seed in production environment');
+    return;
+  }
+
   const hash = async (p: string) => bcrypt.hash(p, 10);
+
+  console.log('🌱 Seeding database with demo data...');
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@maktabi.com' },
     update: {},
-    create: { email: 'admin@maktabi.com', password: await hash('Admin@123'), firstName: 'System', lastName: 'Admin', role: 'ADMIN' },
+    create: {
+      email: 'admin@maktabi.com',
+      password: await hash('Admin@123'),
+      firstName: 'System',
+      lastName: 'Admin',
+      role: 'ADMIN',
+    },
   });
 
   await prisma.user.upsert({
     where: { email: 'ceo@maktabi.com' },
     update: {},
-    create: { email: 'ceo@maktabi.com', password: await hash('Ceo@123'), firstName: 'Ahmed', lastName: 'Al-Rashid', role: 'CEO' },
+    create: {
+      email: 'ceo@maktabi.com',
+      password: await hash('Ceo@123'),
+      firstName: 'Ahmed',
+      lastName: 'Al-Rashid',
+      role: 'CEO',
+    },
   });
 
   await prisma.user.upsert({
     where: { email: 'legal.manager@maktabi.com' },
     update: {},
-    create: { email: 'legal.manager@maktabi.com', password: await hash('Legal@123'), firstName: 'Sara', lastName: 'Al-Mansouri', role: 'LEGAL_MANAGER', department: 'Legal' },
+    create: {
+      email: 'legal.manager@maktabi.com',
+      password: await hash('Legal@123'),
+      firstName: 'Sara',
+      lastName: 'Al-Mansouri',
+      role: 'LEGAL_MANAGER',
+      department: 'Legal',
+    },
   });
 
   const lawyer = await prisma.user.upsert({
     where: { email: 'lawyer@maktabi.com' },
     update: {},
-    create: { email: 'lawyer@maktabi.com', password: await hash('Lawyer@123'), firstName: 'Khalid', lastName: 'Al-Ghamdi', role: 'INTERNAL_LAWYER', department: 'Legal' },
+    create: {
+      email: 'lawyer@maktabi.com',
+      password: await hash('Lawyer@123'),
+      firstName: 'Khalid',
+      lastName: 'Al-Ghamdi',
+      role: 'INTERNAL_LAWYER',
+      department: 'Legal',
+    },
   });
 
   await prisma.user.upsert({
     where: { email: 'hr@maktabi.com' },
     update: {},
-    create: { email: 'hr@maktabi.com', password: await hash('Hr@123'), firstName: 'Fatima', lastName: 'Al-Zahra', role: 'HR', department: 'HR' },
+    create: {
+      email: 'hr@maktabi.com',
+      password: await hash('Hr@123'),
+      firstName: 'Fatima',
+      lastName: 'Al-Zahra',
+      role: 'HR',
+      department: 'HR',
+    },
   });
 
   await prisma.user.upsert({
     where: { email: 'finance@maktabi.com' },
     update: {},
-    create: { email: 'finance@maktabi.com', password: await hash('Finance@123'), firstName: 'Omar', lastName: 'Al-Farouq', role: 'FINANCE', department: 'Finance' },
+    create: {
+      email: 'finance@maktabi.com',
+      password: await hash('Finance@123'),
+      firstName: 'Omar',
+      lastName: 'Al-Farouq',
+      role: 'FINANCE',
+      department: 'Finance',
+    },
   });
 
   await prisma.user.upsert({
     where: { email: 'employee@maktabi.com' },
     update: {},
-    create: { email: 'employee@maktabi.com', password: await hash('Employee@123'), firstName: 'Maryam', lastName: 'Al-Hassan', role: 'EMPLOYEE', department: 'Operations' },
+    create: {
+      email: 'employee@maktabi.com',
+      password: await hash('Employee@123'),
+      firstName: 'Maryam',
+      lastName: 'Al-Hassan',
+      role: 'EMPLOYEE',
+      department: 'Operations',
+    },
   });
 
   // Create brands
@@ -145,8 +200,8 @@ async function main() {
     },
   });
 
-  console.log('Seed data created successfully!');
-  console.log('\nDemo accounts:');
+  console.log('✅ Seed data created successfully!');
+  console.log('\nℹ️  Demo accounts for development:');
   console.log('  admin@maktabi.com / Admin@123');
   console.log('  ceo@maktabi.com / Ceo@123');
   console.log('  legal.manager@maktabi.com / Legal@123');
@@ -154,6 +209,10 @@ async function main() {
   console.log('  hr@maktabi.com / Hr@123');
   console.log('  finance@maktabi.com / Finance@123');
   console.log('  employee@maktabi.com / Employee@123');
+  console.log('\n⚠️  WARNING: Change these credentials before deploying to production!');
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+main().catch((err) => {
+  console.error('❌ Seed failed:', err);
+  process.exit(1);
+}).finally(() => prisma.$disconnect());

@@ -36,10 +36,20 @@ export default function ContractsPage() {
   useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const params: Record<string, string> = {};
-    if (brandFilter !== 'all') params.brandId = brandFilter;
-    api.get('/contracts', { params }).then(r => setContracts(r.data)).catch(() => {}).finally(() => setLoading(false));
+    const load = async () => {
+      setLoading(true);
+      const params: Record<string, string> = {};
+      if (brandFilter !== 'all') params.brandId = brandFilter;
+      try {
+        const r = await api.get('/contracts', { params });
+        setContracts(r.data);
+      } catch {
+        setContracts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, [brandFilter]);
 
   const filtered = contracts.filter(c =>

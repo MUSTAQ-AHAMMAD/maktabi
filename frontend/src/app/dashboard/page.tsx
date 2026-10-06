@@ -6,7 +6,7 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { KpiCard } from '@/components/ui/kpi-card';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Scale, Briefcase, FileText, DollarSign, AlertTriangle, Clock, Plus, Search, MessageSquare, Calendar } from 'lucide-react';
+import { Scale, Briefcase, FileText, DollarSign, AlertTriangle, Clock, Plus, Search, MessageSquare, Calendar, TrendingUp, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
@@ -25,12 +25,14 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Record<string, unknown> | null>(null);
   const [timeline, setTimeline] = useState<unknown[]>([]);
   const [hearings, setHearings] = useState<Array<Record<string, unknown>>>([]);
+  const [deltas, setDeltas] = useState<Record<string, { value: number; delta: number }> | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       api.get('/dashboard/stats').then(r => setStats(r.data)).catch(() => {}),
       api.get('/dashboard/cases-timeline').then(r => setTimeline(r.data)).catch(() => {}),
+      api.get('/analytics/overview').then(r => setDeltas(r.data.kpis)).catch(() => {}),
       api.get('/litigation').then(r => {
         const todayStr = new Date().toDateString();
         const todayHearings = (r.data as Array<Record<string, unknown>>).filter(c => {
@@ -98,14 +100,21 @@ export default function DashboardPage() {
           <div className="absolute inset-0 opacity-[0.06]" style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff'%3E%3Cpath d='M0 0h40v1H0zM0 0v40h1V0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }} />
-          <div className="relative">
-            <p className="text-white/70 text-sm font-medium">
-              {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </p>
-            <h1 className="text-2xl font-bold mt-1">
-              {getGreeting()}, {user?.firstName}!
-            </h1>
-            <p className="text-white/70 text-sm mt-1">Here&apos;s your legal operations overview for today.</p>
+          <div className="relative flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <p className="text-white/70 text-sm font-medium">
+                {new Date().toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+              <h1 className="text-2xl font-bold mt-1">
+                {getGreeting()}, {user?.firstName}!
+              </h1>
+              <p className="text-white/70 text-sm mt-1">Here&apos;s your legal operations overview for today.</p>
+            </div>
+            <Link href="/insights">
+              <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 backdrop-blur-sm">
+                <TrendingUp className="w-4 h-4" /> View Insights <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </Link>
           </div>
         </motion.div>
 
@@ -143,16 +152,19 @@ export default function DashboardPage() {
             title="Active Cases" value={kpis?.activeCases || 0}
             subtitle="In progress or hearing"
             icon={Clock} iconColor="text-amber-600" iconBg="bg-amber-100 dark:bg-amber-900/30"
+            trend={deltas?.activeCases ? { value: deltas.activeCases.delta, label: 'vs prev 30d' } : undefined}
           />
           <KpiCard
             title="Contracts" value={kpis?.totalContracts || 0}
             subtitle={`${kpis?.expiringContracts || 0} expiring soon`}
             icon={Briefcase} iconColor="text-purple-600" iconBg="bg-purple-100 dark:bg-purple-900/30"
+            trend={deltas?.openContracts ? { value: deltas.openContracts.delta, label: 'vs prev 30d' } : undefined}
           />
           <KpiCard
             title="Pending Consultations" value={kpis?.pendingConsultations || 0}
             subtitle="Awaiting legal opinion"
             icon={FileText} iconColor="text-teal-600" iconBg="bg-teal-100 dark:bg-teal-900/30"
+            trend={deltas?.pendingConsultations ? { value: deltas.pendingConsultations.delta, label: 'vs prev 30d' } : undefined}
           />
         </motion.div>
 

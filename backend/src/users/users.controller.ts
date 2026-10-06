@@ -4,6 +4,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -14,20 +16,31 @@ export class UsersController {
 
   @Get()
   @Roles('ADMIN', 'LEGAL_MANAGER')
-  findAll() { return this.usersService.findAll(); }
+  findAll() {
+    return this.usersService.findAll();
+  }
 
   @Get(':id')
-  findOne(@Param('id') id: string) { return this.usersService.findOne(id); }
+  @Roles('ADMIN', 'LEGAL_MANAGER')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
 
   @Post()
   @Roles('ADMIN')
-  create(@Body() body: any) { return this.usersService.create(body); }
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
 
   @Put(':id')
   @Roles('ADMIN')
-  update(@Param('id') id: string, @Body() body: any) { return this.usersService.update(id, body); }
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.update(id, updateUserDto);
+  }
 
   @Delete(':id')
   @Roles('ADMIN')
-  remove(@Param('id') id: string) { return this.usersService.softDelete(id); }
+  remove(@Param('id') id: string) {
+    return this.usersService.softDelete(id);
+  }
 }

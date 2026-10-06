@@ -35,8 +35,8 @@ export class ContractsService {
   }
 
   async updateStatus(id: string, status: string, userId: string, notes?: string) {
-    const c = await this.prisma.contract.findFirst({ where: { id } });
-    if (!c) throw new NotFoundException();
+    const c = await this.prisma.contract.findFirst({ where: { id, deletedAt: null } });
+    if (!c) throw new NotFoundException('Contract not found');
     const updated = await this.prisma.contract.update({ where: { id }, data: { status: status as any } });
     await this.prisma.workflowState.create({
       data: { entityType: 'CONTRACT', entityId: id, fromStatus: c.status, toStatus: status, action: 'STATUS_CHANGE', performedById: userId, notes },

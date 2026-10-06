@@ -54,9 +54,9 @@ docker-compose up -d
 ```
 
 Then open:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:3001
-- Swagger Docs: http://localhost:3001/api/docs
+- Frontend: http://localhost:9000
+- Backend API: http://localhost:9001
+- Swagger Docs: http://localhost:9001/api/docs
 
 ### Option 2: DB in Docker + local backend & frontend
 
@@ -270,7 +270,7 @@ npm run dev
 
 ## 📚 API Documentation
 
-Swagger UI is available at: `http://localhost:3001/api/docs`
+Swagger UI is available at: `http://localhost:9001/api/docs`
 
 ### Key Endpoints
 ```
@@ -469,12 +469,12 @@ docker-compose up -d
 If you see an error like:
 
 ```
-Error response from daemon: ports are not available: exposing port TCP 0.0.0.0:3001 -> 127.0.0.1:0:
-listen tcp 0.0.0.0:3001: bind: Only one usage of each socket address (protocol/network address/port)
+Error response from daemon: ports are not available: exposing port TCP 0.0.0.0:9001 -> 127.0.0.1:0:
+listen tcp 0.0.0.0:9001: bind: Only one usage of each socket address (protocol/network address/port)
 is normally permitted.
 ```
 
-This means another application is already using port 3001 (backend), 3000 (frontend), or 5432 (PostgreSQL).
+This means another application is already using port 9001 (backend), 9000 (frontend), or 5432 (PostgreSQL).
 
 #### Solution 1: Stop the conflicting service
 
@@ -482,11 +482,11 @@ This means another application is already using port 3001 (backend), 3000 (front
 
 **Linux / macOS:**
 ```bash
-# Check what's using port 3001
-lsof -i :3001
+# Check what's using port 9001
+lsof -i :9001
 
-# Check what's using port 3000
-lsof -i :3000
+# Check what's using port 9000
+lsof -i :9000
 
 # Check what's using port 5432
 lsof -i :5432
@@ -494,13 +494,13 @@ lsof -i :5432
 
 **Windows (PowerShell):**
 ```powershell
-# Check what's using port 3001
-Get-NetTCPConnection -LocalPort 3001 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
-Get-Process -Id (Get-NetTCPConnection -LocalPort 3001).OwningProcess
+# Check what's using port 9001
+Get-NetTCPConnection -LocalPort 9001 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 9001).OwningProcess
 
-# Check what's using port 3000
-Get-NetTCPConnection -LocalPort 3000 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
-Get-Process -Id (Get-NetTCPConnection -LocalPort 3000).OwningProcess
+# Check what's using port 9000
+Get-NetTCPConnection -LocalPort 9000 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
+Get-Process -Id (Get-NetTCPConnection -LocalPort 9000).OwningProcess
 
 # Check what's using port 5432
 Get-NetTCPConnection -LocalPort 5432 | Select-Object -Property LocalAddress, LocalPort, State, OwningProcess
@@ -509,11 +509,11 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 5432).OwningProcess
 
 **Windows (Command Prompt):**
 ```cmd
-# Check what's using port 3001
-netstat -ano | findstr :3001
+# Check what's using port 9001
+netstat -ano | findstr :9001
 
-# Check what's using port 3000
-netstat -ano | findstr :3000
+# Check what's using port 9000
+netstat -ano | findstr :9000
 
 # Check what's using port 5432
 netstat -ano | findstr :5432
@@ -544,11 +544,11 @@ If you can't stop the conflicting service, edit `docker-compose.yml` to use diff
 ```yaml
 backend:
   ports:
-    - "3002:3001"  # Changed from 3001:3001 - backend now accessible on localhost:3002
+    - "9002:9001"  # Changed from 9001:9001 - backend now accessible on localhost:9002
 
 frontend:
   ports:
-    - "3001:3000"  # Changed from 3000:3000 - frontend now accessible on localhost:3001
+    - "9001:9000"  # Changed from 9000:9000 - frontend now accessible on localhost:9001
 
 postgres:
   ports:
@@ -560,12 +560,12 @@ postgres:
 ```yaml
 frontend:
   environment:
-    NEXT_PUBLIC_API_URL: "http://localhost:3002"  # Match the new backend port
+    NEXT_PUBLIC_API_URL: "http://localhost:9002"  # Match the new backend port
 ```
 
 ### Backend not responding (ERR_EMPTY_RESPONSE)
 
-If the frontend shows errors like `net::ERR_EMPTY_RESPONSE` when trying to connect to the backend API at `http://localhost:3001`, this means the backend container has crashed or failed to start.
+If the frontend shows errors like `net::ERR_EMPTY_RESPONSE` when trying to connect to the backend API at `http://localhost:9001`, this means the backend container has crashed or failed to start.
 
 #### Diagnosis
 
@@ -627,7 +627,7 @@ docker logs maktabi_backend
 
 **4. Port already in use**
 
-If another process is using port 3001, the backend container may fail. See the "Port already in use" section above.
+If another process is using port 9001, the backend container may fail. See the "Port already in use" section above.
 
 **5. Check backend health manually**
 
@@ -635,10 +635,10 @@ Once the container is running, verify the backend is responding:
 
 ```bash
 # Should return API documentation
-curl http://localhost:3001/api/docs
+curl http://localhost:9001/api/docs
 
 # Should return 200 OK or 401 Unauthorized (both mean backend is working)
-curl http://localhost:3001/auth/login
+curl http://localhost:9001/auth/login
 ```
 
 If curl works but the browser doesn't, check CORS settings or try clearing browser cache.
