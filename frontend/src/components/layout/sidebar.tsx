@@ -1,15 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Scale, Search, FileText, Briefcase, DollarSign,
-  Users, ChevronLeft, ChevronRight, LogOut, Shield, Bell, Calendar, Settings, Tag
+  Users, ChevronRight, LogOut, Shield, Bell, Calendar, Settings, Tag, TrendingUp,
+  ListTodo, Contact, ChevronLeft, Receipt, FileSpreadsheet, Wallet, Landmark, FileSignature,
+  BookOpen, MessageSquare, Palmtree
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useSidebarStore } from '@/store/sidebar.store';
+import { useLocale } from '@/i18n/locale-provider';
 
 const roleLabels: Record<string, string> = {
   ADMIN: 'Administrator',
@@ -24,23 +27,42 @@ const roleLabels: Record<string, string> = {
 };
 
 const navItems = [
-  { href: '/dashboard',      label: 'Dashboard',     icon: LayoutDashboard },
-  { href: '/litigation',     label: 'Litigation',    icon: Scale },
-  { href: '/investigations', label: 'Investigations', icon: Search },
-  { href: '/consultations',  label: 'Consultations', icon: FileText },
-  { href: '/contracts',      label: 'Contracts',     icon: Briefcase },
-  { href: '/financial',      label: 'Financial',     icon: DollarSign },
-  { href: '/calendar',       label: 'Calendar',      icon: Calendar },
-  { href: '/notifications',  label: 'Notifications', icon: Bell,    badge: true },
-  { href: '/brands',         label: 'Brands',        icon: Tag,     roles: ['ADMIN'] },
-  { href: '/users',          label: 'Users',         icon: Users,   roles: ['ADMIN', 'LEGAL_MANAGER'] },
-  { href: '/audit',          label: 'Audit Log',     icon: Shield,  roles: ['ADMIN', 'LEGAL_MANAGER', 'CEO'] },
+  { href: '/dashboard',      key: 'dashboard',      icon: LayoutDashboard },
+  { href: '/insights',       key: 'insights',       icon: TrendingUp },
+  { href: '/tasks',          key: 'tasks',          icon: ListTodo },
+  { href: '/contacts',       key: 'contacts',       icon: Contact },
+  { href: '/litigation',     key: 'litigation',     icon: Scale },
+  { href: '/investigations', key: 'investigations', icon: Search },
+  { href: '/consultations',  key: 'consultations',  icon: FileText },
+  { href: '/contracts',      key: 'contracts',      icon: Briefcase },
+  { href: '/poa',            key: 'poa',            icon: FileSignature },
+  { href: '/financial',      key: 'financial',      icon: DollarSign },
+  { href: '/invoices',       key: 'invoices',       icon: Receipt },
+  { href: '/estimates',      key: 'estimates',      icon: FileSpreadsheet },
+  { href: '/expenses',       key: 'expenses',       icon: Wallet },
+  { href: '/treasury',       key: 'treasury',       icon: Landmark },
+  { href: '/library',        key: 'library',        icon: BookOpen },
+  { href: '/messages',       key: 'messages',       icon: MessageSquare },
+  { href: '/leaves',         key: 'leaves',         icon: Palmtree },
+  { href: '/calendar',       key: 'calendar',       icon: Calendar },
+  { href: '/notifications',  key: 'notifications',  icon: Bell,    badge: true },
+  { href: '/brands',         key: 'brands',         icon: Tag,     roles: ['ADMIN'] },
+  { href: '/users',          key: 'users',          icon: Users,   roles: ['ADMIN', 'LEGAL_MANAGER'] },
+  { href: '/audit',          key: 'audit',          icon: Shield,  roles: ['ADMIN', 'LEGAL_MANAGER', 'CEO'] },
 ];
 
 export function Sidebar() {
   const { collapsed, setCollapsed } = useSidebarStore();
   const pathname = usePathname();
+  const router = useRouter();
   const { user, clearAuth } = useAuthStore();
+  const { t, dir } = useLocale();
+  const isRtl = dir === 'rtl';
+
+  const handleLogout = () => {
+    clearAuth();
+    router.replace('/login');
+  };
 
   const visibleItems = navItems.filter(item => !item.roles || (user && item.roles.includes(user.role)));
 
@@ -48,11 +70,12 @@ export function Sidebar() {
     <motion.aside
       animate={{ width: collapsed ? 64 : 260 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className="fixed left-0 top-0 h-full z-40 flex flex-col overflow-hidden"
+      className="fixed top-0 h-full z-40 flex flex-col overflow-hidden"
       style={{
+        [isRtl ? 'right' : 'left']: 0,
         background: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--sidebar-border)',
-        boxShadow: '4px 0 24px hsl(222 47% 7% / 0.15)',
+        [isRtl ? 'borderLeft' : 'borderRight']: '1px solid var(--sidebar-border)',
+        boxShadow: `${isRtl ? '-4px' : '4px'} 0 24px hsl(222 47% 7% / 0.15)`,
       }}
     >
       {/* Logo */}
@@ -70,9 +93,9 @@ export function Sidebar() {
                 transition={{ duration: 0.2 }}
                 className="overflow-hidden"
               >
-                <span className="text-lg font-bold whitespace-nowrap text-white">Maktabi</span>
+                <span className="text-lg font-bold whitespace-nowrap text-white">{t('app.title')}</span>
                 <p className="text-[10px] whitespace-nowrap" style={{ color: 'var(--sidebar-fg)', marginTop: '-2px' }}>
-                  Legal Management
+                  {t('app.tagline')}
                 </p>
               </motion.div>
             )}
@@ -86,7 +109,7 @@ export function Sidebar() {
           const Icon = item.icon;
           const isActive = pathname.startsWith(item.href);
           return (
-            <Link key={item.href} href={item.href} title={collapsed ? item.label : undefined}>
+            <Link key={item.href} href={item.href} title={collapsed ? t(`nav.${item.key}`) : undefined}>
               <div
                 className={cn(
                   'relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 cursor-pointer group',
@@ -128,7 +151,7 @@ export function Sidebar() {
                       transition={{ duration: 0.15 }}
                       className="flex items-center justify-between flex-1 overflow-hidden"
                     >
-                      <span className="text-sm font-medium whitespace-nowrap">{item.label}</span>
+                      <span className="text-sm font-medium whitespace-nowrap">{t(`nav.${item.key}`)}</span>
                       {/* Notification badge (expanded) */}
                       {item.badge && (
                         <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full shrink-0">
@@ -186,8 +209,9 @@ export function Sidebar() {
         </Link>
 
         <button
-          onClick={() => clearAuth()}
+          onClick={handleLogout}
           title={collapsed ? 'Sign out' : undefined}
+          aria-label="Sign out"
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-150"
           style={{ color: 'var(--sidebar-fg)' }}
           onMouseEnter={e => {

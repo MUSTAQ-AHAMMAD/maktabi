@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Scale, Calendar, Gavel, User, AlertTriangle, DollarSign, Plus } from 'lucide-react';
+import { ArrowLeft, Scale, Calendar, Gavel, User, AlertTriangle, DollarSign, Plus, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
+import { DocumentsPanel } from '@/components/documents-panel';
 import api from '@/lib/api';
 import Link from 'next/link';
 
@@ -233,6 +234,15 @@ export default function LitigationDetailPage() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Documents */}
+        <div className="bg-card border border-border rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">Documents</h3>
+          </div>
+          <DocumentsPanel entityType="litigation" entityId={caseData.id} />
         </div>
       </div>
     </AppLayout>

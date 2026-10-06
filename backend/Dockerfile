@@ -33,6 +33,9 @@ RUN apt-get update -y && \
     apt-get install -y openssl libssl3 ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+# Create non-root user for security
+RUN useradd -m -u 1001 appuser
+
 # Set working directory with absolute path
 WORKDIR /app
 
@@ -68,17 +71,23 @@ RUN chmod +x /app/docker-entrypoint.sh && \
     # Show first line (shebang)
     head -n 1 /app/docker-entrypoint.sh
 
+# Change ownership of app directory to non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 # Set Prisma environment variables
 ENV PRISMA_CLI_BINARY_TARGETS="debian-openssl-3.0.x"
 ENV PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING="1"
 ENV NODE_ENV="production"
 
 # Expose application port
-EXPOSE 3001
+EXPOSE 9001
 
 # Health check to ensure container is running properly
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3001/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); });" || exit 1
+    CMD node -e "require('http').get('http://localhost:9001/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); });" || exit 1
 
 # Use absolute path for entrypoint to avoid any path resolution issues
 # This ensures the script can be found regardless of Docker context

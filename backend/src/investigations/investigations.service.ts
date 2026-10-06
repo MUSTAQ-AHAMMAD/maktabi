@@ -30,8 +30,8 @@ export class InvestigationsService {
   }
 
   async updateStatus(id: string, status: string, userId: string, notes?: string) {
-    const inv = await this.prisma.investigation.findFirst({ where: { id } });
-    if (!inv) throw new NotFoundException();
+    const inv = await this.prisma.investigation.findFirst({ where: { id, deletedAt: null } });
+    if (!inv) throw new NotFoundException('Investigation not found');
     const updated = await this.prisma.investigation.update({ where: { id }, data: { status: status as any } });
     await this.prisma.workflowState.create({
       data: { entityType: 'INVESTIGATION', entityId: id, fromStatus: inv.status, toStatus: status, action: 'STATUS_CHANGE', performedById: userId, notes },

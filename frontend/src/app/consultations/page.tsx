@@ -33,10 +33,20 @@ export default function ConsultationsPage() {
   useEffect(() => { api.get('/brands').then(r => setBrands(r.data)).catch(() => {}); }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const params: Record<string, string> = {};
-    if (brandFilter !== 'all') params.brandId = brandFilter;
-    api.get('/consultations', { params }).then(r => setItems(r.data)).catch(() => {}).finally(() => setLoading(false));
+    const load = async () => {
+      setLoading(true);
+      const params: Record<string, string> = {};
+      if (brandFilter !== 'all') params.brandId = brandFilter;
+      try {
+        const r = await api.get('/consultations', { params });
+        setItems(r.data);
+      } catch {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, [brandFilter]);
 
   const filtered = items.filter(i => i.title?.toLowerCase().includes(search.toLowerCase()));

@@ -34,8 +34,8 @@ export class ConsultationsService {
   }
 
   async updateStatus(id: string, status: string, userId: string, notes?: string) {
-    const c = await this.prisma.consultation.findFirst({ where: { id } });
-    if (!c) throw new NotFoundException();
+    const c = await this.prisma.consultation.findFirst({ where: { id, deletedAt: null } });
+    if (!c) throw new NotFoundException('Consultation not found');
     const updated = await this.prisma.consultation.update({ where: { id }, data: { status: status as any } });
     await this.prisma.workflowState.create({
       data: { entityType: 'CONSULTATION', entityId: id, fromStatus: c.status, toStatus: status, action: 'STATUS_CHANGE', performedById: userId, notes },
